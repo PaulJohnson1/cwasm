@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <pb.h>
 
@@ -254,7 +255,7 @@ int cwasm_instruction_write(struct cwasm_instruction *self, struct proto_bug *wr
     }
 
     default:
-        fprintf(stderr, "invalid opcode found while writing: %02llx %llu\n", self->op, self->op);
+        fprintf(stderr, "invalid opcode found while writing: %02" PRId64 "x %" PRId64 "u\n", self->op, self->op);
         assert(0);
         break;
     }
@@ -345,7 +346,7 @@ int cwasm_instruction_read(struct cwasm_instruction *self, struct proto_bug *rea
     }
 
     default:
-        fprintf(stderr, "invalid opcode found while reading: %02llx %llu\n", self->op, self->op);
+        fprintf(stderr, "invalid opcode found while reading: %02" PRId64 "x %" PRId64 "u\n", self->op, self->op);
         assert(0);
         break;
     }
