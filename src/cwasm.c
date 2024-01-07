@@ -80,7 +80,7 @@ int cwasm_module_write(struct cwasm_module *self, uint8_t *begin, uint64_t *size
     proto_bug_write_uint32(&writer, 1, "version");
 
     static uint8_t section_data[MAX_SECTION_SIZE];
-#define write_section(name)                                                                                                            \
+#define write_section(name)                                                                                                           \
     do                                                                                                                                \
     {                                                                                                                                 \
         if (self->name##s_size != 0)                                                                                                  \
@@ -94,17 +94,17 @@ int cwasm_module_write(struct cwasm_module *self, uint8_t *begin, uint64_t *size
                                                                                                                                       \
             for (struct cwasm_section_##name *i = self->name##s; i < section_end; i++)                                                \
             {                                                                                                                         \
-                int err = cwasm_section_##name##_write(i, &section_writer);                                                            \
+                int err = cwasm_section_##name##_write(i, &section_writer);                                                           \
                 if (err)                                                                                                              \
                     return err;                                                                                                       \
             }                                                                                                                         \
                                                                                                                                       \
             /* copy section writer over to module writer */                                                                           \
             uint64_t byte_count = proto_bug_get_size(&section_writer);                                                                \
-            printf("  writng section %d\t%lu\tsize\n", cwasm_const_section_##name, byte_count);                                      \
+            printf("  writing section %d\t% " PRId64 "u\tsize\n", cwasm_const_section_##name, byte_count);                            \
             proto_bug_write_varuint(&writer, byte_count, "section data size");                                                        \
             /* want 1:1 copy instead of any debug headers*/                                                                           \
-            proto_bug_write_string_internal(&writer, section_writer.start, byte_count);                                               \
+            proto_bug_write_string_internal(&writer, (char *)section_writer.start, byte_count);                                       \
         }                                                                                                                             \
     } while (0)
 
@@ -146,7 +146,7 @@ int cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
         uint64_t element_count = proto_bug_read_varuint(&reader, "element count");
         switch (section_id)
         {
-#define read_section(name)                                               \
+#define read_section(name)                                                 \
     case cwasm_const_section_##name:                                       \
     {                                                                      \
         self->name##s_size = element_count;                                \
@@ -155,7 +155,7 @@ int cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
         struct cwasm_section_##name *end = self->name##s + element_count;  \
         for (struct cwasm_section_##name *i = self->name##s; i < end; i++) \
         {                                                                  \
-            int err = cwasm_section_##name##_read(i, &reader);         \
+            int err = cwasm_section_##name##_read(i, &reader);             \
             if (err)                                                       \
                 return err;                                                \
         }                                                                  \

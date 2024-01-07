@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <pb.h>
 
@@ -254,7 +255,7 @@ int cwasm_instruction_write(struct cwasm_instruction *self, struct proto_bug *wr
     }
 
     default:
-        fprintf(stderr, "invalid opcode found while writng: %02lx %lu\n", self->op, self->op);
+        fprintf(stderr, "invalid opcode found while writing: %02" PRId64 "x %" PRId64 "u\n", self->op, self->op);
         assert(0);
         break;
     }
@@ -286,7 +287,7 @@ int cwasm_instruction_read(struct cwasm_instruction *self, struct proto_bug *rea
             self->immediates_end = new_data + capacity;                                                                 \
             self->immediates_cap = new_data_cap;                                                                        \
         }                                                                                                               \
-        self->immediates_end->UNION_M_NAME = proto_bug_read_##WASM_TYPE(reader, "code::immediate");                   \
+        self->immediates_end->UNION_M_NAME = proto_bug_read_##WASM_TYPE(reader, "code::immediate");                     \
         self->immediates_end++;                                                                                         \
     }
 
@@ -345,7 +346,7 @@ int cwasm_instruction_read(struct cwasm_instruction *self, struct proto_bug *rea
     }
 
     default:
-        fprintf(stderr, "invalid opcode found while reading: %02lx %lu\n", self->op, self->op);
+        fprintf(stderr, "invalid opcode found while reading: %02" PRId64 "x %" PRId64 "u\n", self->op, self->op);
         assert(0);
         break;
     }
@@ -444,7 +445,7 @@ int cwasm_section_code_write(struct cwasm_section_code *self, struct proto_bug *
 
     uint64_t byte_count = proto_bug_get_size(&code_writer);
     proto_bug_write_varuint(writer, byte_count, "code::instructions::size");
-    proto_bug_write_string_internal(writer, code_writer.start, byte_count);
+    proto_bug_write_string_internal(writer, (char *)code_writer.start, byte_count);
 
     return cwasm_error_ok;
 }
