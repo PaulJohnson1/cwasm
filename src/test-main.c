@@ -161,7 +161,7 @@ int main()
     rewind(file);
     (void)fread(data, file_length, 1, file);
     cwasm_module_read(&module, data, file_length);
-    static uint8_t new_data[100000000];
+    static uint8_t new_data[100000000]; // really large for when you do protobug builds
     uint64_t new_size;
     cwasm_module_write(&module, new_data, &new_size);
     cwasm_module_free(&module);
