@@ -287,7 +287,7 @@ int cwasm_instruction_read(struct cwasm_instruction *self, struct proto_bug *rea
             self->immediates_end = new_data + capacity;                                                                 \
             self->immediates_cap = new_data_cap;                                                                        \
         }                                                                                                               \
-        self->immediates_end->UNION_M_NAME = proto_bug_read_##WASM_TYPE(reader, "code::immediate");                   \
+        self->immediates_end->UNION_M_NAME = proto_bug_read_##WASM_TYPE(reader, "code::immediate");                     \
         self->immediates_end++;                                                                                         \
     }
 
@@ -445,7 +445,7 @@ int cwasm_section_code_write(struct cwasm_section_code *self, struct proto_bug *
 
     uint64_t byte_count = proto_bug_get_size(&code_writer);
     proto_bug_write_varuint(writer, byte_count, "code::instructions::size");
-    proto_bug_write_string_internal(writer, (char*) code_writer.start, byte_count);
+    proto_bug_write_string_internal(writer, (char *)code_writer.start, byte_count);
 
     return cwasm_error_ok;
 }
