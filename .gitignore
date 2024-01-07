@@ -1,0 +1,17 @@
+CMakeFiles
+Makefile
+cmake_install.cmake
+CMakeCache.txt
+
+.vscode
+.history
+
+.DS_Store
+
+*.o
+*.bc
+*.tmp
+
+.cache/*
+
+.emsdk_version
