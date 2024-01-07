@@ -101,7 +101,7 @@ int cwasm_module_write(struct cwasm_module *self, uint8_t *begin, uint64_t *size
                                                                                                                                       \
             /* copy section writer over to module writer */                                                                           \
             uint64_t byte_count = proto_bug_get_size(&section_writer);                                                                \
-            printf("  writing section %d\t% " PRId64 "u\tsize\n", cwasm_const_section_##name, byte_count);                            \
+            printf("writing section %d\t%" PRIu64 "\tsize\n", cwasm_const_section_##name, byte_count);                            \
             proto_bug_write_varuint(&writer, byte_count, "section data size");                                                        \
             /* want 1:1 copy instead of any debug headers*/                                                                           \
             proto_bug_write_string_internal(&writer, (char *)section_writer.start, byte_count);                                       \
