@@ -1,7 +1,7 @@
 #include <section/cwasm_export.h>
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <pb.h>
 
@@ -12,7 +12,8 @@ void cwasm_section_export_free(struct cwasm_section_export *self)
     free(self->name);
 }
 
-int cwasm_section_export_write(struct cwasm_section_export *self, struct proto_bug *writer)
+int cwasm_section_export_write(struct cwasm_section_export *self,
+                               struct proto_bug *writer)
 {
     uint64_t name_size = strlen(self->name);
     proto_bug_write_varuint(writer, name_size, "export::name::size");
@@ -21,7 +22,8 @@ int cwasm_section_export_write(struct cwasm_section_export *self, struct proto_b
     return cwasm_error_ok;
 }
 
-int cwasm_section_export_read(struct cwasm_section_export *self, struct proto_bug *reader)
+int cwasm_section_export_read(struct cwasm_section_export *self,
+                              struct proto_bug *reader)
 {
     if (self->name)
         return cwasm_error_no_one_cares;

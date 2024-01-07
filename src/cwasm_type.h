@@ -11,5 +11,7 @@ struct cwasm_type_external
 };
 
 // clone because small
-extern int cwasm_type_external_write(struct cwasm_type_external, struct proto_bug *);
-extern int cwasm_type_external_read(struct cwasm_type_external *, struct proto_bug *);
+extern int cwasm_type_external_write(struct cwasm_type_external,
+                                     struct proto_bug *);
+extern int cwasm_type_external_read(struct cwasm_type_external *,
+                                    struct proto_bug *);
