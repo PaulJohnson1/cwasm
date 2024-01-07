@@ -22,7 +22,8 @@ extern "C"
     XX(uint32)         \
     XX(uint64)         \
     XX(varuint)        \
-    XX(varint32)        \
+    XX(varint32)       \
+    XX(varint64)       \
     XX(float32)        \
     XX(float64)        \
     XX(string)
@@ -351,6 +352,11 @@ extern "C"
         proto_bug_write_debug_header(self, varint32, name, file, line);
         proto_bug_write_varint32_internal(self, data);
     }
+    void proto_bug_write_varint64_debug(struct proto_bug *self, int64_t data, char const *name, char const *file, uint32_t line)
+    {
+        proto_bug_write_debug_header(self, varint64, name, file, line);
+        proto_bug_write_varint64_internal(self, data);
+    }
     void proto_bug_write_string_debug(struct proto_bug *self, char const *string_pointer, uint64_t size, char const *name, char const *file, uint32_t line)
     {
         proto_bug_write_debug_header(self, string, name, file, line);
@@ -396,6 +402,11 @@ extern "C"
     {
         proto_bug_assert_valid_debug_header(self, varint32, name, file, line);
         return proto_bug_read_varint32_internal(self);
+    }
+    int64_t proto_bug_read_varint64_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    {
+        proto_bug_assert_valid_debug_header(self, varint64, name, file, line);
+        return proto_bug_read_varint64_internal(self);
     }
     void proto_bug_read_string_debug(struct proto_bug *self, char *string_pointer, uint64_t size, char const *name, char const *file, uint32_t line)
     {
