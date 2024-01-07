@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(cwasm)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+
 set(SRCS
     src/section/cwasm_code.c
     src/section/cwasm_data.c
