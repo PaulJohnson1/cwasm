@@ -254,7 +254,7 @@ int cwasm_instruction_write(struct cwasm_instruction *self, struct proto_bug *wr
     }
 
     default:
-        fprintf(stderr, "invalid opcode found while writng: %02lx %lu\n", self->op, self->op);
+        fprintf(stderr, "invalid opcode found while writing: %02llx %llu\n", self->op, self->op);
         assert(0);
         break;
     }
@@ -345,7 +345,7 @@ int cwasm_instruction_read(struct cwasm_instruction *self, struct proto_bug *rea
     }
 
     default:
-        fprintf(stderr, "invalid opcode found while reading: %02lx %lu\n", self->op, self->op);
+        fprintf(stderr, "invalid opcode found while reading: %02llx %llu\n", self->op, self->op);
         assert(0);
         break;
     }
@@ -444,7 +444,7 @@ int cwasm_section_code_write(struct cwasm_section_code *self, struct proto_bug *
 
     uint64_t byte_count = proto_bug_get_size(&code_writer);
     proto_bug_write_varuint(writer, byte_count, "code::instructions::size");
-    proto_bug_write_string_internal(writer, code_writer.start, byte_count);
+    proto_bug_write_string_internal(writer, (char*) code_writer.start, byte_count);
 
     return cwasm_error_ok;
 }

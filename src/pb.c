@@ -267,7 +267,7 @@ extern "C"
         {
             assertion_fail_message[sprintf(assertion_fail_message, "proto_bug exception: read invalid data (maybe OOB)\n"
                                                                    "invalid read at: %s:%u\n"
-                                                                   "expected: %llX; encountered: %lX\n",
+                                                                   "expected: %llX; encountered: %llX\n",
                                            file, line,
                                            0x1234567890abcdefllu, magic)] = 0;
 
