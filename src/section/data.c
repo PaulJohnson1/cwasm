@@ -25,6 +25,7 @@ int cwasm_section_data_write(struct cwasm_section_data *self,
 int cwasm_section_data_read(struct cwasm_section_data *self,
                             struct proto_bug *reader)
 {
+    // reads the initialization bytes
 #define READ_INIT                                                              \
     uint64_t max = proto_bug_read_varuint(reader, "data::init_size");          \
     for (uint64_t i = 0; i < max; i++)                                         \

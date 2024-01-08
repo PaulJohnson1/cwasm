@@ -8,7 +8,10 @@
 
 #include <pb.h>
 
+#include <consts.h>
 #include <section/code.h>
+#include <section/custom.h>
+#include <section/data.h>
 #include <section/element.h>
 #include <section/export.h>
 #include <section/function.h>
@@ -17,8 +20,6 @@
 #include <section/memory.h>
 #include <section/table.h>
 #include <section/type.h>
-#include <section/data.h>
-#include <consts.h>
 
 #define MAX_SECTION_SIZE (1024 * 1024 * 8)
 
@@ -29,12 +30,14 @@ void cwasm_module_init(struct cwasm_module *self)
 
 void cwasm_module_free(struct cwasm_module *self)
 {
+    struct cwasm_section_code *codes_end = self->codes + self->codes_size;
+    struct cwasm_section_custom *customs_end =
+        self->customs + self->customs_size;
     struct cwasm_section_type *types_end = self->types + self->types_size;
     struct cwasm_section_import *imports_end =
         self->imports + self->imports_size;
     struct cwasm_section_function *functions_end =
         self->functions + self->functions_size;
-    struct cwasm_section_code *codes_end = self->codes + self->codes_size;
     struct cwasm_section_memory *memorys_end =
         self->memorys + self->memorys_size;
     struct cwasm_section_global *globals_end =
@@ -46,6 +49,10 @@ void cwasm_module_free(struct cwasm_module *self)
         self->elements + self->elements_size;
     struct cwasm_section_data *datas_end = self->datas + self->datas_size;
 
+    for (struct cwasm_section_code *i = self->codes; i < codes_end; i++)
+        cwasm_section_code_free(i);
+    for (struct cwasm_section_custom *i = self->customs; i < customs_end; i++)
+        cwasm_section_custom_free(i);
     for (struct cwasm_section_type *i = self->types; i < types_end; i++)
         cwasm_section_type_free(i);
     for (struct cwasm_section_import *i = self->imports; i < imports_end; i++)
@@ -53,8 +60,6 @@ void cwasm_module_free(struct cwasm_module *self)
     for (struct cwasm_section_function *i = self->functions; i < functions_end;
          i++)
         cwasm_section_function_free(i);
-    for (struct cwasm_section_code *i = self->codes; i < codes_end; i++)
-        cwasm_section_code_free(i);
     for (struct cwasm_section_memory *i = self->memorys; i < memorys_end; i++)
         cwasm_section_memory_free(i);
     for (struct cwasm_section_global *i = self->globals; i < globals_end; i++)
@@ -68,10 +73,11 @@ void cwasm_module_free(struct cwasm_module *self)
         cwasm_section_element_free(i);
     for (struct cwasm_section_data *i = self->datas; i < datas_end; i++)
         cwasm_section_data_free(i);
+    free(self->codes);
+    free(self->customs);
     free(self->types);
     free(self->imports);
     free(self->functions);
-    free(self->codes);
     free(self->memorys);
     free(self->globals);
     free(self->exports);
@@ -165,6 +171,11 @@ int cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
             proto_bug_read_varuint(&reader, "element count");
         switch (section_id)
         {
+        case cwasm_const_section_custom:
+        {
+            
+        }
+
 #define read_section(name)                                                     \
     case cwasm_const_section_##name:                                           \
     {                                                                          \

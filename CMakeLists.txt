@@ -5,6 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 
 set(SRCS
     src/section/code.c
+    src/section/custom.c
     src/section/data.c
     src/section/element.c
     src/section/export.c
