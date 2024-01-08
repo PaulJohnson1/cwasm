@@ -89,32 +89,39 @@ int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
     proto_bug_write_uint32(&writer, 1, "version");
 
     static uint8_t section_data[MAX_SECTION_SIZE];
-#define write_section(name)                                                                                                           \
-    do                                                                                                                                \
-    {                                                                                                                                 \
-        if (self->name##s_size != 0)                                                                                                  \
-        {                                                                                                                             \
-            proto_bug_write_uint8(&writer, cwasm_const_section_##name, "section id");                                                 \
-            /* must use a separate writer for the section since we must be able to get the size and put it before the section data */ \
-            struct proto_bug section_writer;                                                                                          \
-            proto_bug_init(&section_writer, section_data);                                                                            \
-            proto_bug_write_varuint(&section_writer, self->name##s_size, "element count");                                            \
-            struct cwasm_section_##name *section_end = self->name##s + self->name##s_size;                                            \
-                                                                                                                                      \
-            for (struct cwasm_section_##name *i = self->name##s; i < section_end; i++)                                                \
-            {                                                                                                                         \
-                int err = cwasm_section_##name##_write(i, &section_writer);                                                           \
-                if (err)                                                                                                              \
-                    return err;                                                                                                       \
-            }                                                                                                                         \
-                                                                                                                                      \
-            /* copy section writer over to module writer */                                                                           \
-            uint64_t byte_count = proto_bug_get_size(&section_writer);                                                                \
-            printf("  writing section %d\t% " PRId64 "u\tsize\n", cwasm_const_section_##name, byte_count);                            \
-            proto_bug_write_varuint(&writer, byte_count, "section data size");                                                        \
-            /* want 1:1 copy instead of any debug headers*/                                                                           \
-            proto_bug_write_string_internal(&writer, (char *)section_writer.start, byte_count);                                       \
-        }                                                                                                                             \
+#define write_section(name)                                                    \
+    do                                                                         \
+    {                                                                          \
+        if (self->name##s_size != 0)                                           \
+        {                                                                      \
+            proto_bug_write_uint8(&writer, cwasm_const_section_##name,         \
+                                  "section id");                               \
+            /* must use a separate writer for the section since we must be     \
+             * able to get the size and put it before the section data */      \
+            struct proto_bug section_writer;                                   \
+            proto_bug_init(&section_writer, section_data);                     \
+            proto_bug_write_varuint(&section_writer, self->name##s_size,       \
+                                    "element count");                          \
+            struct cwasm_section_##name *section_end =                         \
+                self->name##s + self->name##s_size;                            \
+                                                                               \
+            for (struct cwasm_section_##name *i = self->name##s;               \
+                 i < section_end; i++)                                         \
+            {                                                                  \
+                int err = cwasm_section_##name##_write(i, &section_writer);    \
+                if (err)                                                       \
+                    return err;                                                \
+            }                                                                  \
+                                                                               \
+            /* copy section writer over to module writer */                    \
+            uint64_t byte_count = proto_bug_get_size(&section_writer);         \
+            printf("writing section %d\t%" PRIu64 "\tsize\n",                  \
+                   cwasm_const_section_##name, byte_count);                    \
+            proto_bug_write_varuint(&writer, byte_count, "section data size"); \
+            /* want 1:1 copy instead of any debug headers*/                    \
+            proto_bug_write_string_internal(                                   \
+                &writer, (char *)section_writer.start, byte_count);            \
+        }                                                                      \
     } while (0)
 
     // write_section(custom);

@@ -8,7 +8,7 @@ struct cwasm_section_element
 {
     uint64_t table_index;
     uint64_t type;
-    
+  
     uint64_t *init;
     uint64_t *init_end;
     uint64_t *init_cap;
