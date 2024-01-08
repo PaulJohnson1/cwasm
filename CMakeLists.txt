@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(cwasm)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+
 set(SRCS
     src/section/code.c
     src/section/data.c
@@ -15,14 +17,19 @@ set(SRCS
     src/type.c
     src/cwasm.c
     src/pb.c
-    src/test-main.c
 )
 
 include_directories(src)
 
+if(TEST_BUILD)
+    # todo: Paul
+    # add tests
+else()
+    list(APPEND SRCS "src/test-main.c")
+endif()
+
 if(DEBUG_BUILD)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -gdwarf-4")
-    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address,undefined")
 else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -DPROTO_BUG_NDEBUG -march=native -utune=native")
 endif()
