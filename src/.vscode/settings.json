@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "cwasm_code.h": "c",
+        "cwasm_export.h": "c",
+        "typeinfo": "c",
+        "__locale": "c"
+    }
+}

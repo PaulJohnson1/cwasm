@@ -1,12 +1,12 @@
-#include <section/cwasm_data.h>
+#include <section/data.h>
 
 #include <stdlib.h>
 #include <assert.h>
 
 #include <pb.h>
 
-#include <section/cwasm_code.h>
-#include <cwasm_consts.h>
+#include <section/code.h>
+#include <consts.h>
 
 void cwasm_section_data_free(struct cwasm_section_data *self)
 {

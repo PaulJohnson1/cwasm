@@ -1,8 +1,8 @@
-#include <section/cwasm_memory.h>
+#include <section/memory.h>
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
+#include <consts.h>
 
 void cwasm_section_memory_free(struct cwasm_section_memory *self)
 {

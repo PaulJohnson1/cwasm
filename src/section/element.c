@@ -1,11 +1,11 @@
-#include <section/cwasm_element.h>
+#include <section/element.h>
 
 #include <pb.h>
 
 #include <stdlib.h>
 
-#include <section/cwasm_code.h>
-#include <cwasm_consts.h>
+#include <section/code.h>
+#include <consts.h>
 
 enum cwasm_element_segment_mode
 {

@@ -1,4 +1,4 @@
-#include <section/cwasm_code.h>
+#include <section/code.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,7 +7,7 @@
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
+#include <consts.h>
 
 // #define X(OP, IMMEDIATE_COUNT, ...)
 #define immediate_opcode_types                                  \

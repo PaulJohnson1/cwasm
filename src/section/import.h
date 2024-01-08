@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cwasm_type.h>
+#include <type.h>
 
 struct cwasm_section_import
 {
-    struct cwasm_type_external type;
+    struct type_external type;
     char *module;
     char *name;
 };
