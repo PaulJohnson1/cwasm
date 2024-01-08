@@ -4,17 +4,17 @@ project(cwasm)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 
 set(SRCS
-    src/section/cwasm_code.c
-    src/section/cwasm_data.c
-    src/section/cwasm_element.c
-    src/section/cwasm_export.c
-    src/section/cwasm_function.c
-    src/section/cwasm_global.c
-    src/section/cwasm_import.c
-    src/section/cwasm_table.c
-    src/section/cwasm_memory.c
-    src/section/cwasm_type.c
-    src/cwasm_type.c
+    src/section/code.c
+    src/section/data.c
+    src/section/element.c
+    src/section/export.c
+    src/section/function.c
+    src/section/global.c
+    src/section/import.c
+    src/section/table.c
+    src/section/memory.c
+    src/section/type.c
+    src/type.c
     src/cwasm.c
     src/pb.c
 )
