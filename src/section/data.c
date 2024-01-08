@@ -5,8 +5,8 @@
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
-#include <section/cwasm_code.h>
+#include <consts.h>
+#include <section/code.h>
 
 void cwasm_section_data_free(struct cwasm_section_data *self)
 {
