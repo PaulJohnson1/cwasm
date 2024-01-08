@@ -1,8 +1,8 @@
-#include <section/cwasm_function.h>
+#include <section/function.h>
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
+#include <consts.h>
 
 void cwasm_section_function_free(struct cwasm_section_function *self) {}
 

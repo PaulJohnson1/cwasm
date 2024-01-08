@@ -1,10 +1,10 @@
-#include <section/cwasm_global.h>
+#include <section/global.h>
 
 #include <stdlib.h>
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
+#include <consts.h>
 
 void cwasm_section_global_free(struct cwasm_section_global *self)
 {

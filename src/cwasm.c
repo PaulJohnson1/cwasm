@@ -8,17 +8,17 @@
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
-#include <section/cwasm_code.h>
-#include <section/cwasm_data.h>
-#include <section/cwasm_element.h>
-#include <section/cwasm_export.h>
-#include <section/cwasm_function.h>
-#include <section/cwasm_global.h>
-#include <section/cwasm_import.h>
-#include <section/cwasm_memory.h>
-#include <section/cwasm_table.h>
-#include <section/cwasm_type.h>
+#include <section/code.h>
+#include <section/element.h>
+#include <section/export.h>
+#include <section/function.h>
+#include <section/global.h>
+#include <section/import.h>
+#include <section/memory.h>
+#include <section/table.h>
+#include <section/type.h>
+#include <section/data.h>
+#include <consts.h>
 
 #define MAX_SECTION_SIZE (1024 * 1024 * 8)
 

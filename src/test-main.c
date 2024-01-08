@@ -8,12 +8,12 @@
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
-#include <section/cwasm_code.h>
-#include <section/cwasm_export.h>
-#include <section/cwasm_function.h>
-#include <section/cwasm_import.h>
-#include <section/cwasm_type.h>
+#include <consts.h>
+#include <section/code.h>
+#include <section/export.h>
+#include <section/function.h>
+#include <section/import.h>
+#include <section/type.h>
 
 void log_hex(uint8_t *start, uint8_t *end)
 {

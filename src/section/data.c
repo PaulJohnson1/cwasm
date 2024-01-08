@@ -1,4 +1,4 @@
-#include <section/cwasm_data.h>
+#include <section/data.h>
 
 #include <assert.h>
 #include <stdlib.h>

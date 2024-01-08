@@ -1,11 +1,11 @@
-#include <section/cwasm_export.h>
+#include <section/export.h>
 
 #include <stdlib.h>
 #include <string.h>
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
+#include <consts.h>
 
 void cwasm_section_export_free(struct cwasm_section_export *self)
 {

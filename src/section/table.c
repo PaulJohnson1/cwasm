@@ -1,11 +1,11 @@
-#include <section/cwasm_table.h>
+#include <section/table.h>
 
 #include <stdlib.h>
 #include <string.h>
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
+#include <consts.h>
 
 void cwasm_section_table_free(struct cwasm_section_table *self) {}
 

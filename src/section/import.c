@@ -1,11 +1,11 @@
-#include <section/cwasm_import.h>
+#include <section/import.h>
 
 #include <stdlib.h>
 #include <string.h>
 
 #include <pb.h>
 
-#include <cwasm_consts.h>
+#include <consts.h>
 
 void cwasm_section_import_free(struct cwasm_section_import *self)
 {
@@ -39,6 +39,6 @@ int cwasm_section_import_read(struct cwasm_section_import *self,
     self->name = malloc(name_size);
     proto_bug_read_string(reader, self->name, name_size, "import::name");
     cwasm_type_external_read(&self->type, reader);
-
+    
     return cwasm_error_ok;
 }
