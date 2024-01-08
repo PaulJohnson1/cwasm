@@ -1,10 +1,10 @@
 #include "pb.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <inttypes.h>
 #ifndef PROTO_BUG_WINDOWS
 #include <alloca.h>
 #define PROTO_BUG_ALLOCA(size) alloca(size)
@@ -17,16 +17,16 @@
 extern "C"
 {
 #endif
-#define ENCODING_TYPES \
-    XX(uint8)          \
-    XX(uint16)         \
-    XX(uint32)         \
-    XX(uint64)         \
-    XX(varuint)        \
-    XX(varint32)       \
-    XX(varint64)       \
-    XX(float32)        \
-    XX(float64)        \
+#define ENCODING_TYPES                                                         \
+    XX(uint8)                                                                  \
+    XX(uint16)                                                                 \
+    XX(uint32)                                                                 \
+    XX(uint64)                                                                 \
+    XX(varuint)                                                                \
+    XX(varint32)                                                               \
+    XX(varint64)                                                               \
+    XX(float32)                                                                \
+    XX(float64)                                                                \
     XX(string)
 
     enum encoding_type
@@ -40,8 +40,8 @@ extern "C"
     {
         switch (encoding_type)
         {
-#define XX(n) \
-    case n:   \
+#define XX(n)                                                                  \
+    case n:                                                                    \
         return #n;
             ENCODING_TYPES
 #undef XX
@@ -90,13 +90,17 @@ extern "C"
         proto_bug_write_uint8_internal(self, (data & 0xff0000ull) >> 16ull);
         proto_bug_write_uint8_internal(self, (data & 0xff000000ull) >> 24ull);
         proto_bug_write_uint8_internal(self, (data & 0xff00000000ull) >> 32ull);
-        proto_bug_write_uint8_internal(self, (data & 0xff0000000000ull) >> 40ull);
-        proto_bug_write_uint8_internal(self, (data & 0xff000000000000ull) >> 48ull);
-        proto_bug_write_uint8_internal(self, (data & 0xff00000000000000ull) >> 56ull);
+        proto_bug_write_uint8_internal(self,
+                                       (data & 0xff0000000000ull) >> 40ull);
+        proto_bug_write_uint8_internal(self,
+                                       (data & 0xff000000000000ull) >> 48ull);
+        proto_bug_write_uint8_internal(self,
+                                       (data & 0xff00000000000000ull) >> 56ull);
     }
     void proto_bug_write_float32_internal(struct proto_bug *self, float data)
     {
-        memcpy(self->current, &data, sizeof data); // the compiler is a genius and optimizes self
+        memcpy(self->current, &data,
+               sizeof data); // the compiler is a genius and optimizes self
         self->current += sizeof data;
     }
     void proto_bug_write_float64_internal(struct proto_bug *self, double data)
@@ -136,7 +140,8 @@ extern "C"
             int32_t byte = data & 0x7fll;
             data >>= 7ll;
 
-            if ((data == -1ll && (byte & 0x40ll)) || (data == 0ll && !(byte & 0x40ll)))
+            if ((data == -1ll && (byte & 0x40ll)) ||
+                (data == 0ll && !(byte & 0x40ll)))
             {
                 *self->current++ = byte;
                 break;
@@ -145,7 +150,8 @@ extern "C"
                 *self->current++ = byte | 0x80ll;
         }
     }
-    void proto_bug_write_string_internal(struct proto_bug *self, char const *string, uint64_t size)
+    void proto_bug_write_string_internal(struct proto_bug *self,
+                                         char const *string, uint64_t size)
     {
         for (uint64_t i = 0; i < size; i++)
             proto_bug_write_uint8_internal(self, string[i]);
@@ -253,7 +259,8 @@ extern "C"
             }
         }
     }
-    void proto_bug_read_string_internal(struct proto_bug *self, char *string, uint64_t size)
+    void proto_bug_read_string_internal(struct proto_bug *self, char *string,
+                                        uint64_t size)
     {
         for (uint64_t i = 0; i < size; i++)
             string[i] = proto_bug_read_uint8_internal(self);
@@ -262,22 +269,26 @@ extern "C"
 #ifndef PROTO_BUG_NDEBUG
     static char assertion_fail_message[1024];
 
-    void proto_bug_assert_valid_debug_header(struct proto_bug *self, enum encoding_type expected_encoding_type, char const *name, char const *file, uint32_t line)
+    void proto_bug_assert_valid_debug_header(
+        struct proto_bug *self, enum encoding_type expected_encoding_type,
+        char const *name, char const *file, uint32_t line)
     {
         uint64_t magic = proto_bug_read_uint64_internal(self);
         if (magic != 0x1234567890abcdefull)
         {
-            assertion_fail_message[sprintf(assertion_fail_message, "proto_bug exception: read invalid data (maybe OOB)\n"
-                                                                   "invalid read at: %s:%u\n"
-                                                                   "expected: %" PRId64 "X; encountered: %" PRId64 "X\n",
-                                           file, line,
-                                           0x1234567890abcdefllu, magic)] = 0;
+            assertion_fail_message[sprintf(
+                assertion_fail_message,
+                "proto_bug exception: read invalid data (maybe OOB)\n"
+                "invalid read at: %s:%u\n"
+                "expected: %" PRId64 "X; encountered: %" PRId64 "X\n",
+                file, line, 0x1234567890abcdefllu, magic)] = 0;
 
             fputs(assertion_fail_message, stderr);
             abort();
         }
         // explicit casting because of c++
-        enum encoding_type received_encoding_type = (enum encoding_type)proto_bug_read_uint8_internal(self);
+        enum encoding_type received_encoding_type =
+            (enum encoding_type)proto_bug_read_uint8_internal(self);
         uint64_t name_size = proto_bug_read_varuint_internal(self);
         uint64_t file_size = proto_bug_read_varuint_internal(self);
         char *received_name = (char *)PROTO_BUG_ALLOCA(name_size + 1);
@@ -287,20 +298,28 @@ extern "C"
         proto_bug_read_string_internal(self, received_name, name_size);
         proto_bug_read_string_internal(self, received_file, file_size);
         uint32_t received_line = proto_bug_read_varuint_internal(self);
-        if ((received_encoding_type != expected_encoding_type) || ((name_size != strlen(name) || (strcmp(received_name, name)))))
+        if ((received_encoding_type != expected_encoding_type) ||
+            ((name_size != strlen(name) || (strcmp(received_name, name)))))
         {
-            assertion_fail_message[sprintf(assertion_fail_message, "proto_bug exception: read/write debug information does not match.\n"
-                                                                   "expected:    encoding_type: %s\tname: %s\t   read_at: %s:%u\n"
-                                                                   "encountered: encoding_type: %s\tname: %s\twritten_at: %s:%u\n",
-                                           get_encoding_type_string(expected_encoding_type), name, file, line,
-                                           get_encoding_type_string(received_encoding_type), received_name, received_file, received_line)] = 0;
+            assertion_fail_message[sprintf(
+                assertion_fail_message,
+                "proto_bug exception: read/write debug information does not "
+                "match.\n"
+                "expected:    encoding_type: %s\tname: %s\t   read_at: %s:%u\n"
+                "encountered: encoding_type: %s\tname: %s\twritten_at: %s:%u\n",
+                get_encoding_type_string(expected_encoding_type), name, file,
+                line, get_encoding_type_string(received_encoding_type),
+                received_name, received_file, received_line)] = 0;
 
             fputs(assertion_fail_message, stderr);
             abort();
         }
     }
 
-    void proto_bug_write_debug_header(struct proto_bug *self, enum encoding_type encoding_type, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_debug_header(struct proto_bug *self,
+                                      enum encoding_type encoding_type,
+                                      char const *name, char const *file,
+                                      uint32_t line)
     {
         proto_bug_write_uint64_internal(self, 0x1234567890abcdefull);
         proto_bug_write_uint8_internal(self, encoding_type);
@@ -313,103 +332,143 @@ extern "C"
         proto_bug_write_varuint_internal(self, line);
     }
 
-    void proto_bug_write_uint8_debug(struct proto_bug *self, uint8_t data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_uint8_debug(struct proto_bug *self, uint8_t data,
+                                     char const *name, char const *file,
+                                     uint32_t line)
     {
         proto_bug_write_debug_header(self, uint8, name, file, line);
         proto_bug_write_uint8_internal(self, data);
     }
-    void proto_bug_write_uint16_debug(struct proto_bug *self, uint16_t data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_uint16_debug(struct proto_bug *self, uint16_t data,
+                                      char const *name, char const *file,
+                                      uint32_t line)
     {
         proto_bug_write_debug_header(self, uint16, name, file, line);
         proto_bug_write_uint16_internal(self, data);
     }
-    void proto_bug_write_uint32_debug(struct proto_bug *self, uint32_t data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_uint32_debug(struct proto_bug *self, uint32_t data,
+                                      char const *name, char const *file,
+                                      uint32_t line)
     {
         proto_bug_write_debug_header(self, uint32, name, file, line);
         proto_bug_write_uint32_internal(self, data);
     }
-    void proto_bug_write_uint64_debug(struct proto_bug *self, uint64_t data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_uint64_debug(struct proto_bug *self, uint64_t data,
+                                      char const *name, char const *file,
+                                      uint32_t line)
     {
         proto_bug_write_debug_header(self, uint64, name, file, line);
         proto_bug_write_uint64_internal(self, data);
     }
-    void proto_bug_write_float32_debug(struct proto_bug *self, float data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_float32_debug(struct proto_bug *self, float data,
+                                       char const *name, char const *file,
+                                       uint32_t line)
     {
         proto_bug_write_debug_header(self, float32, name, file, line);
         proto_bug_write_float32_internal(self, data);
     }
-    void proto_bug_write_float64_debug(struct proto_bug *self, double data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_float64_debug(struct proto_bug *self, double data,
+                                       char const *name, char const *file,
+                                       uint32_t line)
     {
         proto_bug_write_debug_header(self, float64, name, file, line);
         proto_bug_write_float64_internal(self, data);
     }
-    void proto_bug_write_varuint_debug(struct proto_bug *self, uint64_t data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_varuint_debug(struct proto_bug *self, uint64_t data,
+                                       char const *name, char const *file,
+                                       uint32_t line)
     {
         proto_bug_write_debug_header(self, varuint, name, file, line);
         proto_bug_write_varuint_internal(self, data);
     }
-    void proto_bug_write_varint32_debug(struct proto_bug *self, int32_t data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_varint32_debug(struct proto_bug *self, int32_t data,
+                                        char const *name, char const *file,
+                                        uint32_t line)
     {
         proto_bug_write_debug_header(self, varint32, name, file, line);
         proto_bug_write_varint32_internal(self, data);
     }
-    void proto_bug_write_varint64_debug(struct proto_bug *self, int64_t data, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_varint64_debug(struct proto_bug *self, int64_t data,
+                                        char const *name, char const *file,
+                                        uint32_t line)
     {
         proto_bug_write_debug_header(self, varint64, name, file, line);
         proto_bug_write_varint64_internal(self, data);
     }
-    void proto_bug_write_string_debug(struct proto_bug *self, char const *string_pointer, uint64_t size, char const *name, char const *file, uint32_t line)
+    void proto_bug_write_string_debug(struct proto_bug *self,
+                                      char const *string_pointer, uint64_t size,
+                                      char const *name, char const *file,
+                                      uint32_t line)
     {
         proto_bug_write_debug_header(self, string, name, file, line);
         proto_bug_write_string_internal(self, string_pointer, size);
     }
 
-    uint8_t proto_bug_read_uint8_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    uint8_t proto_bug_read_uint8_debug(struct proto_bug *self, char const *name,
+                                       char const *file, uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, uint8, name, file, line);
         return proto_bug_read_uint8_internal(self);
     }
-    uint16_t proto_bug_read_uint16_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    uint16_t proto_bug_read_uint16_debug(struct proto_bug *self,
+                                         char const *name, char const *file,
+                                         uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, uint16, name, file, line);
         return proto_bug_read_uint16_internal(self);
     }
-    uint32_t proto_bug_read_uint32_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    uint32_t proto_bug_read_uint32_debug(struct proto_bug *self,
+                                         char const *name, char const *file,
+                                         uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, uint32, name, file, line);
         return proto_bug_read_uint32_internal(self);
     }
-    uint64_t proto_bug_read_uint64_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    uint64_t proto_bug_read_uint64_debug(struct proto_bug *self,
+                                         char const *name, char const *file,
+                                         uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, uint64, name, file, line);
         return proto_bug_read_uint64_internal(self);
     }
-    float proto_bug_read_float32_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    float proto_bug_read_float32_debug(struct proto_bug *self, char const *name,
+                                       char const *file, uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, float32, name, file, line);
         return proto_bug_read_float32_internal(self);
     }
-    double proto_bug_read_float64_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    double proto_bug_read_float64_debug(struct proto_bug *self,
+                                        char const *name, char const *file,
+                                        uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, float64, name, file, line);
         return proto_bug_read_float64_internal(self);
     }
-    uint64_t proto_bug_read_varuint_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    uint64_t proto_bug_read_varuint_debug(struct proto_bug *self,
+                                          char const *name, char const *file,
+                                          uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, varuint, name, file, line);
         return proto_bug_read_varuint_internal(self);
     }
-    int32_t proto_bug_read_varint32_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    int32_t proto_bug_read_varint32_debug(struct proto_bug *self,
+                                          char const *name, char const *file,
+                                          uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, varint32, name, file, line);
         return proto_bug_read_varint32_internal(self);
     }
-    int64_t proto_bug_read_varint64_debug(struct proto_bug *self, char const *name, char const *file, uint32_t line)
+    int64_t proto_bug_read_varint64_debug(struct proto_bug *self,
+                                          char const *name, char const *file,
+                                          uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, varint64, name, file, line);
         return proto_bug_read_varint64_internal(self);
     }
-    void proto_bug_read_string_debug(struct proto_bug *self, char *string_pointer, uint64_t size, char const *name, char const *file, uint32_t line)
+    void proto_bug_read_string_debug(struct proto_bug *self,
+                                     char *string_pointer, uint64_t size,
+                                     char const *name, char const *file,
+                                     uint32_t line)
     {
         proto_bug_assert_valid_debug_header(self, string, name, file, line);
         proto_bug_read_string_internal(self, string_pointer, size);

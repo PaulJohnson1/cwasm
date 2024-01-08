@@ -25,5 +25,7 @@ struct cwasm_section_data
 };
 
 extern void cwasm_section_data_free(struct cwasm_section_data *);
-extern int cwasm_section_data_write(struct cwasm_section_data *, struct proto_bug *);
-extern int cwasm_section_data_read(struct cwasm_section_data *, struct proto_bug *);
+extern int cwasm_section_data_write(struct cwasm_section_data *,
+                                    struct proto_bug *);
+extern int cwasm_section_data_read(struct cwasm_section_data *,
+                                   struct proto_bug *);

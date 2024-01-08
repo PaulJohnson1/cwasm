@@ -2,7 +2,8 @@
 
 #include <stdint.h>
 
-// note: grammar not proper, memorys should be called memories but macros are annoying
+// note: grammar not proper, memorys should be called memories but macros are
+// annoying
 struct cwasm_module
 {
     uint64_t types_size;
@@ -29,5 +30,7 @@ struct cwasm_module
 
 extern void cwasm_module_init(struct cwasm_module *);
 extern void cwasm_module_free(struct cwasm_module *);
-extern int cwasm_module_read(struct cwasm_module *, uint8_t *begin, uint64_t size);
-extern int cwasm_module_write(struct cwasm_module *self, uint8_t *begin, uint64_t *size);
+extern int cwasm_module_read(struct cwasm_module *, uint8_t *begin,
+                             uint64_t size);
+extern int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
+                              uint64_t *size);

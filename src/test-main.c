@@ -1,16 +1,16 @@
 #include <cwasm.h>
 
-#include <stdio.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <memory.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <pb.h>
 
 #include <consts.h>
-#include <section/export.h>
 #include <section/code.h>
+#include <section/export.h>
 #include <section/function.h>
 #include <section/import.h>
 #include <section/type.h>
@@ -22,7 +22,8 @@ void log_hex(uint8_t *start, uint8_t *end)
     puts("");
 }
 
-struct cwasm_instruction create_instruction(uint64_t op, uint64_t immediate_count, ...)
+struct cwasm_instruction create_instruction(uint64_t op,
+                                            uint64_t immediate_count, ...)
 {
     struct cwasm_instruction instruction;
     memset(&instruction, 0, sizeof instruction);
@@ -34,9 +35,13 @@ struct cwasm_instruction create_instruction(uint64_t op, uint64_t immediate_coun
         union cwasm_immediate immediate = va_arg(args, union cwasm_immediate);
         if (instruction.immediates_end >= instruction.immediates_cap)
         {
-            uint64_t capacity = instruction.immediates_cap - instruction.immediates;
-            // allocate for one extra space since initial space is 0 and 0 * 2 = 0
-            union cwasm_immediate *new_data = realloc(instruction.immediates, (capacity * 2 + 1) * sizeof *instruction.immediates);
+            uint64_t capacity =
+                instruction.immediates_cap - instruction.immediates;
+            // allocate for one extra space since initial space is 0 and 0 * 2 =
+            // 0
+            union cwasm_immediate *new_data =
+                realloc(instruction.immediates,
+                        (capacity * 2 + 1) * sizeof *instruction.immediates);
             union cwasm_immediate *new_data_cap = new_data + capacity * 2 + 1;
             instruction.immediates = new_data;
             instruction.immediates_end = new_data + capacity;
@@ -55,13 +60,18 @@ void set_instructions(struct cwasm_section_code *code, uint64_t count, ...)
     va_start(args, count);
     for (uint64_t i = 0; i < count; i++)
     {
-        struct cwasm_instruction instruction = va_arg(args, struct cwasm_instruction);
+        struct cwasm_instruction instruction =
+            va_arg(args, struct cwasm_instruction);
         if (code->instructions_end >= code->instructions_cap)
         {
             uint64_t capacity = code->instructions_cap - code->instructions;
-            // allocate for one extra space since initial space is 0 and 0 * 2 = 0
-            struct cwasm_instruction *new_data = realloc(code->instructions, (capacity * 2 + 1) * sizeof *code->instructions);
-            struct cwasm_instruction *new_data_cap = new_data + capacity * 2 + 1;
+            // allocate for one extra space since initial space is 0 and 0 * 2 =
+            // 0
+            struct cwasm_instruction *new_data =
+                realloc(code->instructions,
+                        (capacity * 2 + 1) * sizeof *code->instructions);
+            struct cwasm_instruction *new_data_cap =
+                new_data + capacity * 2 + 1;
             code->instructions = new_data;
             code->instructions_end = new_data + capacity;
             code->instructions_cap = new_data_cap;
@@ -84,9 +94,10 @@ int main()
     // module.exports_size = 1;
     // module.imports = malloc(module.imports_size * sizeof *module.imports);
     // module.types = malloc(module.types_size * sizeof *module.types);
-    // module.functions = malloc(module.functions_size * sizeof *module.functions);
-    // module.codes = malloc(module.codes_size * sizeof *module.codes);
-    // module.exports = malloc(module.exports_size * sizeof *module.exports);
+    // module.functions = malloc(module.functions_size * sizeof
+    // *module.functions); module.codes = malloc(module.codes_size * sizeof
+    // *module.codes); module.exports = malloc(module.exports_size * sizeof
+    // *module.exports);
 
     // module.imports[0].name = strdup("transform"); // they must be on the heap
     // module.imports[0].module = strdup("m");
@@ -161,7 +172,8 @@ int main()
     rewind(file);
     (void)fread(data, file_length, 1, file);
     cwasm_module_read(&module, data, file_length);
-    static uint8_t new_data[100000000]; // really large for when you do protobug builds
+    static uint8_t
+        new_data[100000000]; // really large for when you do protobug builds
     uint64_t new_size;
     cwasm_module_write(&module, new_data, &new_size);
     cwasm_module_free(&module);
