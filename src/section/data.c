@@ -29,18 +29,7 @@ int cwasm_section_data_read(struct cwasm_section_data *self,
     uint64_t max = proto_bug_read_varuint(reader, "data::init_size");          \
     for (uint64_t i = 0; i < max; i++)                                         \
     {                                                                          \
-        if (self->initialization_end >= self->initialization_cap)              \
-        {                                                                      \
-            uint64_t capacity =                                                \
-                self->initialization_cap - self->initialization;               \
-            uint8_t *new_data =                                                \
-                realloc(self->initialization,                                  \
-                        (capacity * 2 + 1) * sizeof *self->initialization);    \
-            uint8_t *new_data_cap = new_data + capacity * 2 + 1;               \
-            self->initialization = new_data;                                   \
-            self->initialization_end = new_data + capacity;                    \
-            self->initialization_cap = new_data_cap;                           \
-        }                                                                      \
+        cwasm_vector_grow(uint8_t, self->initialization);                      \
         *self->initialization_end++ =                                          \
             proto_bug_read_uint8(reader, "data::init");                        \
     }
