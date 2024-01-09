@@ -2,21 +2,16 @@
 
 #include <stdint.h>
 
+#include <vector.h>
+
 struct proto_bug;
 
 struct cwasm_section_element
 {
     uint64_t table_index;
     uint64_t type;
-  
-    uint64_t *init;
-    uint64_t *init_end;
-    uint64_t *init_cap;
-
-    struct cwasm_instruction *instructions;
-    struct cwasm_instruction *instructions_end;
-    struct cwasm_instruction *instructions_cap;
-
+    cwasm_vector_declare(uint64_t, init);
+    cwasm_vector_declare(struct cwasm_instruction, instructions);
     uint8_t mode_flags;
 };
 

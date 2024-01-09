@@ -21,6 +21,7 @@ void cwasm_section_element_free(struct cwasm_section_element *self)
          i < self->instructions_end; i++)
         cwasm_instruction_free(i);
     free(self->instructions);
+    free(self->init);
 }
 
 #define element_instructions                                                   \

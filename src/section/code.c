@@ -246,20 +246,18 @@ int cwasm_instruction_write(struct cwasm_instruction *self,
         }                                                                      \
         break;                                                                 \
     }
-        immediate_opcode_types
+    immediate_opcode_types
 #undef X
 #undef Y
-            case cwasm_opcode_br_table:
-        {
-            uint64_t immediates_count =
-                self->immediates_end - self->immediates - 1;
-            proto_bug_write_varuint(writer, immediates_count,
-                                    "immediate_br_table");
-            for (uint64_t i = 0; i < immediates_count; i++)
-                proto_bug_write_varuint(writer, self->immediates[i + 1].uint64,
-                                        "immediate");
-            break;
-        }
+        case cwasm_opcode_br_table:
+    {
+        uint64_t immediates_count = self->immediates_end - self->immediates - 1;
+        proto_bug_write_varuint(writer, immediates_count, "immediate_br_table");
+        for (uint64_t i = 0; i < immediates_count; i++)
+            proto_bug_write_varuint(writer, self->immediates[i + 1].uint64,
+                                    "immediate");
+        break;
+    }
 
     default:
         fprintf(stderr,
@@ -290,20 +288,9 @@ int cwasm_instruction_read(struct cwasm_instruction *self,
 #define Y(WASM_TYPE, UNION_M_NAME)                                             \
     if (wasm_immediate_types[i] == wasm_types_##WASM_TYPE)                     \
     {                                                                          \
-        if (self->immediates_end >= self->immediates_cap)                      \
-        {                                                                      \
-            uint64_t capacity = self->immediates_cap - self->immediates;       \
-            union cwasm_immediate *new_data =                                  \
-                realloc(self->immediates,                                      \
-                        (capacity * 2 + 1) * sizeof *self->immediates);        \
-            union cwasm_immediate *new_data_cap = new_data + capacity * 2 + 1; \
-            self->immediates = new_data;                                       \
-            self->immediates_end = new_data + capacity;                        \
-            self->immediates_cap = new_data_cap;                               \
-        }                                                                      \
-        self->immediates_end->UNION_M_NAME =                                   \
+        cwasm_vector_grow(union cwasm_immediate, self->immediates);            \
+        (self->immediates_end++)->UNION_M_NAME =                               \
             proto_bug_read_##WASM_TYPE(reader, "code::immediate");             \
-        self->immediates_end++;                                                \
     }
 
 #define X(OP, IMMEDIATE_COUNT, ...)                                            \
@@ -317,53 +304,29 @@ int cwasm_instruction_read(struct cwasm_instruction *self,
         }                                                                      \
         break;                                                                 \
     }
-        immediate_opcode_types
+    immediate_opcode_types
 #undef Y
 #undef X
-            // instructions with variable number of immediates
-            case cwasm_opcode_select_with_type:
+        // instructions with variable number of immediates
+        case cwasm_opcode_select_with_type:
+    {
+        uint64_t max = proto_bug_read_varuint(reader, "element::init_size");
+        for (uint64_t i = 0; i < max; i++)
         {
-            uint64_t max = proto_bug_read_varuint(reader, "element::init_size");
-            for (uint64_t i = 0; i < max; i++)
-            {
-                if (self->immediates_end >= self->immediates_cap)
-                {
-                    uint64_t capacity = self->immediates_cap - self->immediates;
-                    union cwasm_immediate *new_data =
-                        realloc(self->immediates,
-                                (capacity * 2 + 1) * sizeof *self->immediates);
-                    union cwasm_immediate *new_data_cap =
-                        new_data + capacity * 2 + 1;
-                    self->immediates = new_data;
-                    self->immediates_end = new_data + capacity;
-                    self->immediates_cap = new_data_cap;
-                }
-                self->immediates_end->uint64 =
-                    proto_bug_read_varuint(reader, "code::immediate");
-                self->immediates_end++;
-            }
-            break;
+            cwasm_vector_grow(union cwasm_immediate, self->immediates);
+            (self->immediates_end++)->uint64 =
+                proto_bug_read_varuint(reader, "code::immediate");
         }
+        break;
+    }
     case cwasm_opcode_br_table:
     {
         uint64_t max = proto_bug_read_varuint(reader, "immediate_br_table");
         for (uint64_t i = 0; i < max + 1; i++)
         {
-            if (self->immediates_end >= self->immediates_cap)
-            {
-                uint64_t capacity = self->immediates_cap - self->immediates;
-                union cwasm_immediate *new_data =
-                    realloc(self->immediates,
-                            (capacity * 2 + 1) * sizeof *self->immediates);
-                union cwasm_immediate *new_data_cap =
-                    new_data + capacity * 2 + 1;
-                self->immediates = new_data;
-                self->immediates_end = new_data + capacity;
-                self->immediates_cap = new_data_cap;
-            }
-            self->immediates_end->uint64 =
+            cwasm_vector_grow(union cwasm_immediate, self->immediates);
+            (self->immediates_end++)->uint64 =
                 proto_bug_read_varuint(reader, "code::immediate");
-            self->immediates_end++;
         }
 
         break;
@@ -389,11 +352,10 @@ int cwasm_instruction_read_vector(struct proto_bug *reader,
 
     while (1)
     {
+        // cannot use cwasm_vector_grow
         if (*end >= *cap)
         {
             uint64_t capacity = *cap - *begin;
-            // allocate for one extra space since initial space is 0 and 0 * 2 =
-            // 0
             struct cwasm_instruction *new_data =
                 realloc(*begin, (capacity * 2 + 1) * sizeof **begin);
             struct cwasm_instruction *new_data_cap =
@@ -505,15 +467,7 @@ int cwasm_section_code_read(struct cwasm_section_code *self,
         uint8_t type = proto_bug_read_uint8(reader, "code::local::type");
         for (uint64_t j = 0; j < amount_of_type; j++)
         {
-            if (self->locals_end >= self->locals_cap)
-            {
-                uint64_t capacity = self->locals_cap - self->locals;
-                uint8_t *new_data = realloc(self->locals, capacity * 2 + 1);
-                uint8_t *new_data_cap = new_data + capacity * 2 + 1;
-                self->locals = new_data;
-                self->locals_end = new_data + capacity;
-                self->locals_cap = new_data_cap;
-            }
+            cwasm_vector_grow(uint8_t, self->locals);
             *self->locals_end = type;
             self->locals_end++;
         }

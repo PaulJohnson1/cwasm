@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <vector.h>
+
 struct proto_bug;
 
 union cwasm_immediate
@@ -15,9 +17,7 @@ union cwasm_immediate
 struct cwasm_instruction
 {
     uint64_t op;
-    union cwasm_immediate *immediates;
-    union cwasm_immediate *immediates_end;
-    union cwasm_immediate *immediates_cap;
+    cwasm_vector_declare(union cwasm_immediate, immediates);
 };
 
 extern int cwasm_instruction_write(struct cwasm_instruction *,
@@ -32,12 +32,8 @@ extern void cwasm_instruction_free(struct cwasm_instruction *);
 
 struct cwasm_section_code
 {
-    struct cwasm_instruction *instructions;
-    struct cwasm_instruction *instructions_end;
-    struct cwasm_instruction *instructions_cap;
-    uint8_t *locals;
-    uint8_t *locals_end;
-    uint8_t *locals_cap;
+    cwasm_vector_declare(struct cwasm_instruction, instructions);
+    cwasm_vector_declare(uint8_t, locals);
 };
 
 extern void cwasm_section_code_free(struct cwasm_section_code *);
