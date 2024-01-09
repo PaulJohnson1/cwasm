@@ -3,15 +3,14 @@
 #include <stdint.h>
 
 #include <section/code.h>
+#include <vector.h>
 
 struct proto_bug;
 
 struct cwasm_section_global
 {
     uint64_t type;
-    struct cwasm_instruction *instructions;
-    struct cwasm_instruction *instructions_end;
-    struct cwasm_instruction *instructions_cap;
+    cwasm_vector_declare(struct cwasm_instruction, instructions);
 };
 
 extern void cwasm_section_global_free(struct cwasm_section_global *);

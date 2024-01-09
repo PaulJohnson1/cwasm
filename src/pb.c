@@ -281,7 +281,7 @@ extern "C"
                 "proto_bug exception: read invalid data (maybe OOB)\n"
                 "invalid read at: %s:%u\n"
                 "expected: %" PRId64 "X; encountered: %" PRId64 "X\n",
-                file, line, 0x1234567890abcdefllu, magic)] = 0;
+                file, line, 0x1234567890abcdeflu, magic)] = 0;
 
             fputs(assertion_fail_message, stderr);
             abort();

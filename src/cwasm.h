@@ -2,34 +2,23 @@
 
 #include <stdint.h>
 
+#include <vector.h>
+
 // note: grammar not proper, memorys should be called memories but macros are
 // annoying
 struct cwasm_module
 {
-    uint64_t codes_size;
-    uint64_t customs_size;
-    // data
-    uint64_t elements_size;
-    uint64_t exports_size;
-    uint64_t functions_size;
-    uint64_t globals_size;
-    uint64_t imports_size;
-    uint64_t memorys_size;
-    uint64_t tables_size;
-    uint64_t datas_size;
-    uint64_t types_size;
-
-    struct cwasm_section_code *codes;
-    struct cwasm_section_custom *customs;
-    struct cwasm_section_data *datas;
-    struct cwasm_section_element *elements;
-    struct cwasm_section_export *exports;
-    struct cwasm_section_function *functions;
-    struct cwasm_section_global *globals;
-    struct cwasm_section_import *imports;
-    struct cwasm_section_memory *memorys;
-    struct cwasm_section_table *tables;
-    struct cwasm_section_type *types;
+    cwasm_vector_declare(struct cwasm_section_type, types);
+    cwasm_vector_declare(struct cwasm_section_custom, customs);
+    cwasm_vector_declare(struct cwasm_section_import, imports);
+    cwasm_vector_declare(struct cwasm_section_function, functions);
+    cwasm_vector_declare(struct cwasm_section_code, codes);
+    cwasm_vector_declare(struct cwasm_section_memory, memorys);
+    cwasm_vector_declare(struct cwasm_section_global, globals);
+    cwasm_vector_declare(struct cwasm_section_export, exports);
+    cwasm_vector_declare(struct cwasm_section_table, tables);
+    cwasm_vector_declare(struct cwasm_section_element, elements);
+    cwasm_vector_declare(struct cwasm_section_data, datas);
 };
 
 extern void cwasm_module_init(struct cwasm_module *);

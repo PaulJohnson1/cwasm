@@ -33,10 +33,10 @@ int cwasm_section_import_read(struct cwasm_section_import *self,
 {
     uint64_t module_size =
         proto_bug_read_varuint(reader, "import::module::size");
-    self->module = malloc(module_size);
+    self->module = calloc(module_size + 1, 1);
     proto_bug_read_string(reader, self->module, module_size, "import::module");
     uint64_t name_size = proto_bug_read_varuint(reader, "import::name::size");
-    self->name = malloc(name_size);
+    self->name = calloc(name_size + 1, 1);
     proto_bug_read_string(reader, self->name, name_size, "import::name");
     cwasm_type_external_read(&self->type, reader);
     
