@@ -9,9 +9,14 @@
     if (name##_end >= name##_cap)                                              \
     {                                                                          \
         uint64_t capacity = name##_cap - name;                                 \
-        type *new_data = realloc(name, (capacity * 2 + 1) * sizeof *name);       \
+        type *new_data = realloc(name, (capacity * 2 + 1) * sizeof *name);     \
         type *new_data_cap = new_data + capacity * 2 + 1;                      \
         name = new_data;                                                       \
         name##_end = new_data + capacity;                                      \
         name##_cap = new_data_cap;                                             \
     }
+
+#define cwasm_vector_set_size(name, size)                                      \
+    name = malloc(element_count * sizeof *name);                               \
+    memset(name, 0, element_count * sizeof *name);                             \
+    name##_end = name##_cap = name + size;

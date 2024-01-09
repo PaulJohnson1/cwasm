@@ -196,7 +196,8 @@
     X(i32_reinterpret_f32, 0)                                                  \
     X(i64_reinterpret_f64, 0)                                                  \
     X(f32_reinterpret_f32, 0)                                                  \
-    X(f64_reinterpret_f64, 0)
+    X(f64_reinterpret_f64, 0)                                                  \
+    X(ref_null, 1, wasm_types_varuint)
 
 // #define Y(TYPE, UNION_M_NAME, ...)
 #define immediate_types                                                        \
@@ -334,8 +335,7 @@ int cwasm_instruction_read(struct cwasm_instruction *self,
 
     default:
         fprintf(stderr,
-                "invalid opcode found while reading: %02" PRId64 "x %" PRId64
-                "u\n",
+                "invalid opcode found while reading: %02lx %" PRId64 "u\n",
                 self->op, self->op);
         assert(0);
         break;

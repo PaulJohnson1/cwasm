@@ -34,6 +34,14 @@ enum cwasm_reference_type
     cwasm_reference_type_external_reference = -17
 };
 
+enum cwasm_external_type
+{
+    cwasm_external_type_function,
+    cwasm_external_type_table,
+    cwasm_external_type_memory,
+    cwasm_external_type_global,
+};
+
 enum cwasm_ocode
 {
     cwasm_opcode_unreachable = 0,
@@ -223,4 +231,6 @@ enum cwasm_ocode
     cwasm_opcode_i64_reinterpret_f64 = 189,
     cwasm_opcode_f32_reinterpret_f32 = 190,
     cwasm_opcode_f64_reinterpret_f64 = 191,
+
+    cwasm_opcode_ref_null = 208
 };
