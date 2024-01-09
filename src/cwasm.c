@@ -10,6 +10,7 @@
 
 #include <consts.h>
 #include <section/code.h>
+#include <section/custom.h>
 #include <section/data.h>
 #include <section/element.h>
 #include <section/export.h>
@@ -37,6 +38,7 @@ void cwasm_module_free(struct cwasm_module *self)
             cwasm_section_##name##_free(i);                                    \
         free(self->name##s);                                                   \
     }
+    free_section(custom);
     free_section(code);
     free_section(data);
     free_section(element);
@@ -92,7 +94,6 @@ int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
         }                                                                      \
     } while (0)
 
-    // write_section(custom);
     write_section(type);
     write_section(import);
     write_section(function);
@@ -125,30 +126,35 @@ int cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
     while (proto_bug_get_size(&reader) < size)
     {
         uint8_t section_id = proto_bug_read_uint8(&reader, "section id");
-        uint8_t *old = reader.current;
-        uint8_t *end = proto_bug_read_varuint(&reader, "section data size") +
-                       reader.current;
-        printf("reading section %d\t%lu\tsize\n", section_id, end - old);
+        uint64_t size = proto_bug_read_varuint(&reader, "section data size");
+        uint8_t *expected_end = reader.current + size;
+        printf("@%lu\treading section %d\t%lu\tsize\n",
+               reader.current - reader.start, section_id, size);
+
+        // part of the vector
         uint64_t element_count =
             proto_bug_read_varuint(&reader, "element count");
         switch (section_id)
         {
+        case cwasm_const_section_custom:
+        {
+            cwasm_vector_grow(struct cwasm_section_custom, self->customs);
+            cwasm_section_custom_read(self->customs_end++, &reader);
+            break;
+        }
+#define concat(a, b) a##b
 #define read_section(name)                                                     \
     case cwasm_const_section_##name:                                           \
     {                                                                          \
         self->name##s = malloc(element_count * sizeof *self->name##s);         \
         memset(self->name##s, 0, element_count * sizeof *self->name##s);       \
         self->name##s_end = self->name##s_cap = self->name##s + element_count; \
+        /*cwasm_vector_set_size(name, s), element_count)*/                     \
         for (struct cwasm_section_##name *i = self->name##s;                   \
              i < self->name##s_end; i++)                                       \
-        {                                                                      \
-            int err = cwasm_section_##name##_read(i, &reader);                 \
-            if (err)                                                           \
-                return err;                                                    \
-        }                                                                      \
+            cwasm_section_##name##_read(i, &reader);                           \
         break;                                                                 \
     }
-            //  read_section(custom);
             read_section(type);
             read_section(import);
             read_section(function);
@@ -167,6 +173,7 @@ int cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
                     section_id, proto_bug_get_size(&reader));
             assert(0);
         }
+        assert(expected_end == reader.current);
     }
 
     return cwasm_error_ok;

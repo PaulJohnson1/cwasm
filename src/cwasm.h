@@ -9,6 +9,7 @@
 struct cwasm_module
 {
     cwasm_vector_declare(struct cwasm_section_type, types);
+    cwasm_vector_declare(struct cwasm_section_custom, customs);
     cwasm_vector_declare(struct cwasm_section_import, imports);
     cwasm_vector_declare(struct cwasm_section_function, functions);
     cwasm_vector_declare(struct cwasm_section_code, codes);

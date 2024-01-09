@@ -1,13 +1,13 @@
 #pragma once
 
 #include <stdint.h>
+#include <type.h>
 
 struct proto_bug;
 
 struct cwasm_section_memory
 {
-    uint64_t min;
-    uint64_t max;
+    struct cwasm_type_limit limit;
 };
 
 extern void cwasm_section_memory_free(struct cwasm_section_memory *);

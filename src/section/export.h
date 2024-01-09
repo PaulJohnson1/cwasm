@@ -9,7 +9,6 @@ struct proto_bug;
 struct cwasm_section_export
 {
     char *name;
-    struct cwasm_type_external type;
 };
 
 extern void cwasm_section_export_free(struct cwasm_section_export *);
