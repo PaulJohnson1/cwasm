@@ -35,17 +35,18 @@ void cwasm_module_free(struct cwasm_module *self)
         for (struct cwasm_section_##name *i = self->name##s;                   \
              i < self->name##s_end; i++)                                       \
             cwasm_section_##name##_free(i);                                    \
+        free(self->name##s);                                                   \
     }
-    free(self->codes);
-    free(self->datas);
-    free(self->elements);
-    free(self->exports);
-    free(self->functions);
-    free(self->globals);
-    free(self->imports);
-    free(self->memorys);
-    free(self->tables);
-    free(self->types);
+    free_section(code);
+    free_section(data);
+    free_section(element);
+    free_section(export);
+    free_section(function);
+    free_section(global);
+    free_section(import);
+    free_section(memory);
+    free_section(table);
+    free_section(type);
 }
 
 int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
