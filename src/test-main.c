@@ -33,22 +33,8 @@ struct cwasm_instruction create_instruction(uint64_t op,
     for (uint64_t i = 0; i < immediate_count; i++)
     {
         union cwasm_immediate immediate = va_arg(args, union cwasm_immediate);
-        if (instruction.immediates_end >= instruction.immediates_cap)
-        {
-            uint64_t capacity =
-                instruction.immediates_cap - instruction.immediates;
-            // allocate for one extra space since initial space is 0 and 0 * 2 =
-            // 0
-            union cwasm_immediate *new_data =
-                realloc(instruction.immediates,
-                        (capacity * 2 + 1) * sizeof *instruction.immediates);
-            union cwasm_immediate *new_data_cap = new_data + capacity * 2 + 1;
-            instruction.immediates = new_data;
-            instruction.immediates_end = new_data + capacity;
-            instruction.immediates_cap = new_data_cap;
-        }
-        *instruction.immediates_end = immediate;
-        instruction.immediates_end++;
+        cwasm_vector_grow(union cwasm_immediate, instruction.immediates);
+        *instruction.immediates_end++ = immediate;
     }
 
     return instruction;

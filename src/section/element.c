@@ -67,7 +67,7 @@ void cwasm_section_element_free(struct cwasm_section_element *self)
     }
 
 void cwasm_section_element_write(struct cwasm_section_element *self,
-                                struct proto_bug *writer)
+                                 struct proto_bug *writer)
 {
 #define expression                                                             \
     cwasm_instruction_expression_write(&self->expression, writer);
@@ -105,14 +105,25 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
 }
 
 void cwasm_section_element_read(struct cwasm_section_element *self,
-                               struct proto_bug *reader)
+                                struct proto_bug *reader)
 {
 #define expression cwasm_instruction_expression_read(&self->expression, reader);
 
 #define expression_vector                                                      \
-    cwasm_vector_grow(struct cwasm_instruction_expression, self->expressions); \
-    cwasm_instruction_expression_read(self->expressions_end, reader);          \
-    self->expressions_end++;
+    do                                                                         \
+    {                                                                          \
+        uint64_t count = proto_bug_read_varuint(reader, "element::expr_vec::"  \
+                                                        "count");              \
+        if (count)                                                             \
+        {                                                                      \
+            self->expressions = self->expressions_end =                        \
+                self->expressions_cap =                                        \
+                    malloc(count * sizeof *self->expressions);                 \
+            for (struct cwasm_instruction_expression *i = self->expressions;   \
+                 i < self->expressions_end; i++)                               \
+                cwasm_instruction_expression_read(i, reader);                  \
+        }                                                                      \
+    } while (0);
 
 #define initialization                                                         \
     do                                                                         \
@@ -139,6 +150,7 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
     element_instructions;
 
 #undef expression
+#undef expression_vector
 #undef initialization
 #undef table_index
 #undef reference_type

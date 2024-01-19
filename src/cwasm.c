@@ -21,7 +21,7 @@
 #include <section/table.h>
 #include <section/type.h>
 
-#define MAX_SECTION_SIZE (1024 * 1024 * 8)
+#define max_section_size (1024 * 1024 * 8)
 
 void cwasm_module_init(struct cwasm_module *self)
 {
@@ -59,7 +59,7 @@ void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
     proto_bug_write_uint32(&writer, 0x6d736100, "magic");
     proto_bug_write_uint32(&writer, 1, "version");
 
-    static uint8_t section_data[MAX_SECTION_SIZE];
+    static uint8_t section_data[max_section_size];
 #define write_section(name)                                                    \
     do                                                                         \
     {                                                                          \

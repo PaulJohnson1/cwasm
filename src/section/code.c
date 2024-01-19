@@ -10,7 +10,7 @@
 
 #include <consts.h>
 
-// #define X(OP, IMMEDIATE_COUNT, ...)
+// #define X(op, immediate_count, ...)
 #define immediate_opcode_types                                                 \
     X(unreachable, 0)                                                          \
     X(nop, 0)                                                                  \
@@ -199,7 +199,7 @@
     X(f64_reinterpret_f64, 0)                                                  \
     X(ref_null, 1, wasm_types_varuint)
 
-// #define Y(TYPE, UNION_M_NAME, ...)
+// #define Y(type, union_m_name, ...)
 #define immediate_types                                                        \
     Y(varint32, int64)                                                         \
     Y(varint64, int64)                                                         \
@@ -230,18 +230,18 @@ void cwasm_instruction_write(struct cwasm_instruction *self,
 
     switch (self->op)
     {
-#define Y(WASM_TYPE, UNION_M_NAME)                                             \
-    if (wasm_immediate_types[i] == wasm_types_##WASM_TYPE)                     \
-        proto_bug_write_##WASM_TYPE(writer, self->immediates[i].UNION_M_NAME,  \
+#define Y(wasm_type, union_m_name)                                             \
+    if (wasm_immediate_types[i] == wasm_types_##wasm_type)                     \
+        proto_bug_write_##wasm_type(writer, self->immediates[i].union_m_name,  \
                                     "code::immediate");
 
-#define X(OP, IMMEDIATE_COUNT, ...)                                            \
-    case cwasm_opcode_##OP:                                                    \
+#define X(op, immediate_count, ...)                                            \
+    case cwasm_opcode_##op:                                                    \
     {                                                                          \
         /* compiler will optimize */                                           \
-        enum e_wasm_types wasm_immediate_types[IMMEDIATE_COUNT] = {            \
+        enum e_wasm_types wasm_immediate_types[immediate_count] = {            \
             __VA_ARGS__};                                                      \
-        for (uint64_t i = 0; i < IMMEDIATE_COUNT; i++)                         \
+        for (uint64_t i = 0; i < immediate_count; i++)                         \
         {                                                                      \
             immediate_types                                                    \
         }                                                                      \
@@ -284,20 +284,20 @@ void cwasm_instruction_read(struct cwasm_instruction *self,
 
     switch (self->op)
     {
-#define Y(WASM_TYPE, UNION_M_NAME)                                             \
-    if (wasm_immediate_types[i] == wasm_types_##WASM_TYPE)                     \
+#define Y(wasm_type, union_m_name)                                             \
+    if (wasm_immediate_types[i] == wasm_types_##wasm_type)                     \
     {                                                                          \
         cwasm_vector_grow(union cwasm_immediate, self->immediates);            \
-        (self->immediates_end++)->UNION_M_NAME =                               \
-            proto_bug_read_##WASM_TYPE(reader, "code::immediate");             \
+        (self->immediates_end++)->union_m_name =                               \
+            proto_bug_read_##wasm_type(reader, "code::immediate");             \
     }
 
-#define X(OP, IMMEDIATE_COUNT, ...)                                            \
-    case cwasm_opcode_##OP:                                                    \
+#define X(op, immediate_count, ...)                                            \
+    case cwasm_opcode_##op:                                                    \
     {                                                                          \
-        enum e_wasm_types wasm_immediate_types[IMMEDIATE_COUNT] = {            \
+        enum e_wasm_types wasm_immediate_types[immediate_count] = {            \
             __VA_ARGS__};                                                      \
-        for (uint64_t i = 0; i < IMMEDIATE_COUNT; i++)                         \
+        for (uint64_t i = 0; i < immediate_count; i++)                         \
         {                                                                      \
             immediate_types                                                    \
         }                                                                      \
