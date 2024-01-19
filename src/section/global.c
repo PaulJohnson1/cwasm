@@ -8,19 +8,14 @@
 
 void cwasm_section_global_free(struct cwasm_section_global *self)
 {
-    for (struct cwasm_instruction *i = self->instructions;
-         i < self->instructions_end; i++)
-        cwasm_instruction_free(i);
-    free(self->instructions);
+    cwasm_instruction_expression_free(&self->expression);
 }
 
 int cwasm_section_global_write(struct cwasm_section_global *self,
                                struct proto_bug *writer)
 {
     proto_bug_write_varuint(writer, self->type, "global::type");
-    for (struct cwasm_instruction *i = self->instructions;
-         i < self->instructions_end; i++)
-        cwasm_instruction_write(i, writer);
+    cwasm_instruction_expression_write(&self->expression, writer);
     return cwasm_error_ok;
 }
 
@@ -28,8 +23,6 @@ int cwasm_section_global_read(struct cwasm_section_global *self,
                               struct proto_bug *reader)
 {
     self->type = proto_bug_read_varuint(reader, "global::type");
-    cwasm_instruction_read_vector(reader, &self->instructions,
-                                  &self->instructions_end,
-                                  &self->instructions_cap);
+    cwasm_instruction_expression_read(&self->expression, reader);
     return cwasm_error_ok;
 }

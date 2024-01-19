@@ -10,7 +10,7 @@ struct proto_bug;
 struct cwasm_section_global
 {
     uint64_t type;
-    cwasm_vector_declare(struct cwasm_instruction, instructions);
+    struct cwasm_instruction_expression expression;
 };
 
 extern void cwasm_section_global_free(struct cwasm_section_global *);

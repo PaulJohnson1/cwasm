@@ -62,22 +62,10 @@ void set_instructions(struct cwasm_section_code *code, uint64_t count, ...)
     {
         struct cwasm_instruction instruction =
             va_arg(args, struct cwasm_instruction);
-        if (code->instructions_end >= code->instructions_cap)
-        {
-            uint64_t capacity = code->instructions_cap - code->instructions;
-            // allocate for one extra space since initial space is 0 and 0 * 2 =
-            // 0
-            struct cwasm_instruction *new_data =
-                realloc(code->instructions,
-                        (capacity * 2 + 1) * sizeof *code->instructions);
-            struct cwasm_instruction *new_data_cap =
-                new_data + capacity * 2 + 1;
-            code->instructions = new_data;
-            code->instructions_end = new_data + capacity;
-            code->instructions_cap = new_data_cap;
-        }
-        *code->instructions_end = instruction;
-        code->instructions_end++;
+        cwasm_vector_grow(struct cwasm_instruction,
+                          code->expression.instructions);
+        *code->expression.instructions_end = instruction;
+        code->expression.instructions_end++;
     }
     va_end(args);
 }

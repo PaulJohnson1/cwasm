@@ -343,30 +343,25 @@ int cwasm_instruction_read(struct cwasm_instruction *self,
     return cwasm_error_ok;
 }
 
-int cwasm_instruction_read_vector(struct proto_bug *reader,
-                                  struct cwasm_instruction **begin,
-                                  struct cwasm_instruction **end,
-                                  struct cwasm_instruction **cap)
+void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
+                                        struct proto_bug *writer)
+{
+    for (struct cwasm_instruction *i = e->instructions; i < e->instructions_end;
+         i++)
+        cwasm_instruction_write(i, writer);
+}
+
+int cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
+                                      struct proto_bug *reader)
 {
     uint64_t depth = 1;
 
     while (1)
     {
-        // cannot use cwasm_vector_grow
-        if (*end >= *cap)
-        {
-            uint64_t capacity = *cap - *begin;
-            struct cwasm_instruction *new_data =
-                realloc(*begin, (capacity * 2 + 1) * sizeof **begin);
-            struct cwasm_instruction *new_data_cap =
-                new_data + capacity * 2 + 1;
-            *begin = new_data;
-            *end = new_data + capacity;
-            *cap = new_data_cap;
-        }
-        cwasm_instruction_read(*end, reader);
-        uint64_t op = (*end)->op;
-        ++*end;
+        cwasm_vector_grow(struct cwasm_instruction, out->instructions);
+        cwasm_instruction_read(out->instructions_end, reader);
+        uint64_t op = out->instructions_end->op;
+        out->instructions_end++;
         switch (op)
         {
         case cwasm_opcode_end:
@@ -392,12 +387,17 @@ void cwasm_instruction_free(struct cwasm_instruction *i)
     free(i->immediates);
 }
 
+void cwasm_instruction_expression_free(struct cwasm_instruction_expression *e)
+{
+    for (struct cwasm_instruction *i = e->instructions; i < e->instructions_end;
+         i++)
+        cwasm_instruction_free(i);
+    free(e->instructions);
+}
+
 void cwasm_section_code_free(struct cwasm_section_code *self)
 {
-    for (struct cwasm_instruction *i = self->instructions;
-         i < self->instructions_end; i++)
-        cwasm_instruction_free(i);
-    free(self->instructions);
+    cwasm_instruction_expression_free(&self->expression);
     free(self->locals);
 }
 
@@ -440,10 +440,6 @@ int cwasm_section_code_write(struct cwasm_section_code *self,
         }
     }
 
-    for (struct cwasm_instruction *i = self->instructions;
-         i < self->instructions_end; i++)
-        cwasm_instruction_write(i, &code_writer);
-
     uint64_t byte_count = proto_bug_get_size(&code_writer);
     proto_bug_write_varuint(writer, byte_count, "code::instructions::size");
     proto_bug_write_string_internal(writer, (char *)code_writer.start,
@@ -473,9 +469,7 @@ int cwasm_section_code_read(struct cwasm_section_code *self,
         }
     }
 
-    cwasm_instruction_read_vector(reader, &self->instructions,
-                                  &self->instructions_end,
-                                  &self->instructions_cap);
+    cwasm_instruction_expression_read(&self->expression, reader);
 
     return cwasm_error_ok;
 }

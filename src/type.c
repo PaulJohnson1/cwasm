@@ -1,5 +1,7 @@
 #include <type.h>
 
+#include <assert.h>
+
 #include <pb.h>
 
 #include <consts.h>
@@ -63,4 +65,35 @@ void cwasm_type_global_read(struct cwasm_type_global *self,
 {
     self->value_type = proto_bug_read_uint8(reader, "global::value_type");
     self->flags = proto_bug_read_varuint(reader, "global::flags");
+}
+
+void cwasm_type_description_write(struct cwasm_type_description *self,
+                                  struct proto_bug *writer)
+{
+}
+
+void cwasm_type_description_read(struct cwasm_type_description *self,
+                                 struct proto_bug *reader)
+{
+
+    self->type = proto_bug_read_uint8(reader, "description::type");
+
+    switch (self->type)
+    {
+    case cwasm_type_description_type_function:
+        self->table_index =
+            proto_bug_read_varuint(reader, "description::type_index");
+        break;
+    case cwasm_type_description_type_table:
+        cwasm_type_table_read(&self->table, reader);
+        break;
+    case cwasm_type_description_type_memory:
+        cwasm_type_memory_read(&self->memory, reader);
+        break;
+    case cwasm_type_description_type_global:
+        cwasm_type_global_read(&self->global, reader);
+        break;
+    default:
+        assert(0);
+    }
 }

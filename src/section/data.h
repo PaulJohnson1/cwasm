@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <section/code.h>
 #include <vector.h>
 
 struct proto_bug;
@@ -18,7 +19,7 @@ struct cwasm_section_data
     enum cwasm_data_segment_mode mode;
     uint64_t memory_index;
 
-    cwasm_vector_declare(struct cwasm_instruction, offset);
+    struct cwasm_instruction_expression offset;
     cwasm_vector_declare(uint8_t, initialization);
 };
 

@@ -23,6 +23,8 @@ int cwasm_section_import_write(struct cwasm_section_import *self,
     proto_bug_write_string(writer, self->module, module_size, "import::module");
     proto_bug_write_varuint(writer, name_size, "import::name::size");
     proto_bug_write_string(writer, self->name, name_size, "import::name");
+    cwasm_type_description_write(&self->description, writer);
+
     return cwasm_error_ok;
 }
 
@@ -36,26 +38,7 @@ int cwasm_section_import_read(struct cwasm_section_import *self,
     uint64_t name_size = proto_bug_read_varuint(reader, "import::name::size");
     self->name = calloc(name_size + 1, 1);
     proto_bug_read_string(reader, self->name, name_size, "import::name");
-
-    self->type = proto_bug_read_uint8(reader, "import::type");
-
-    switch (self->type)
-    {
-    case cwasm_external_type_function:
-        self->description.table_index = proto_bug_read_varuint(reader, "import::type_index");
-        break;
-    case cwasm_external_type_table:
-        cwasm_type_table_read(&self->description.table, reader);
-        break;
-    case cwasm_external_type_memory:
-        cwasm_type_memory_read(&self->description.memory, reader);
-        break;
-    case cwasm_external_type_global:
-        cwasm_type_global_read(&self->description.global, reader);
-        break;
-    default:
-        assert(0);
-    }
+    cwasm_type_description_read(&self->description, reader);
 
     return cwasm_error_ok;
 }
