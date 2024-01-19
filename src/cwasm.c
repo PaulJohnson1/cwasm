@@ -51,8 +51,8 @@ void cwasm_module_free(struct cwasm_module *self)
     free_section(type);
 }
 
-int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
-                       uint64_t *size)
+void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
+                        uint64_t *size)
 {
     struct proto_bug writer;
     proto_bug_init(&writer, begin);
@@ -77,11 +77,7 @@ int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
                                                                                \
             for (struct cwasm_section_##name *i = self->name##s;               \
                  i < self->name##s_end; i++)                                   \
-            {                                                                  \
-                int err = cwasm_section_##name##_write(i, &section_writer);    \
-                if (err)                                                       \
-                    return err;                                                \
-            }                                                                  \
+                cwasm_section_##name##_write(i, &section_writer);              \
                                                                                \
             /* copy section writer over to module writer */                    \
             uint64_t byte_count = proto_bug_get_size(&section_writer);         \
@@ -109,19 +105,17 @@ int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
 #undef write_section
 
     *size = proto_bug_get_size(&writer);
-
-    return cwasm_error_ok;
 }
 
-int cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
+void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
 {
     struct proto_bug reader;
     proto_bug_init(&reader, begin);
     if (proto_bug_read_uint32(&reader, "magic") != 0x6d736100)
-        return cwasm_error_invalid_magic;
+        assert(0);
     // wasm 2.0 not supported
     if (proto_bug_read_uint32(&reader, "version") != 1)
-        return cwasm_error_invalid_version;
+        assert(0);
 
     while (proto_bug_get_size(&reader) < size)
     {
@@ -175,6 +169,4 @@ int cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
         }
         assert(expected_end == reader.current);
     }
-
-    return cwasm_error_ok;
 }

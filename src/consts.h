@@ -1,16 +1,5 @@
 #pragma once
 
-enum cwasm_error
-{
-    cwasm_error_ok = 0,
-    cwasm_error_invalid_magic = 10001,
-    cwasm_error_invalid_version,
-    cwasm_error_section_type_invalid_mystery_byte,
-    cwasm_error_section_type_params_already_allocated,
-    cwasm_error_section_type_params_allocated_without_size,
-    cwasm_error_no_one_cares
-};
-
 enum cwasm_const_section
 {
     cwasm_const_section_custom,

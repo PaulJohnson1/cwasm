@@ -14,7 +14,7 @@ void cwasm_section_import_free(struct cwasm_section_import *self)
     free(self->name);
 }
 
-int cwasm_section_import_write(struct cwasm_section_import *self,
+void cwasm_section_import_write(struct cwasm_section_import *self,
                                struct proto_bug *writer)
 {
     uint64_t module_size = strlen(self->module);
@@ -24,11 +24,9 @@ int cwasm_section_import_write(struct cwasm_section_import *self,
     proto_bug_write_varuint(writer, name_size, "import::name::size");
     proto_bug_write_string(writer, self->name, name_size, "import::name");
     cwasm_type_description_write(&self->description, writer);
-
-    return cwasm_error_ok;
 }
 
-int cwasm_section_import_read(struct cwasm_section_import *self,
+void cwasm_section_import_read(struct cwasm_section_import *self,
                               struct proto_bug *reader)
 {
     uint64_t module_size =
@@ -39,6 +37,4 @@ int cwasm_section_import_read(struct cwasm_section_import *self,
     self->name = calloc(name_size + 1, 1);
     proto_bug_read_string(reader, self->name, name_size, "import::name");
     cwasm_type_description_read(&self->description, reader);
-
-    return cwasm_error_ok;
 }

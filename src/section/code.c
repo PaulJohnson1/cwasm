@@ -216,7 +216,7 @@ enum e_wasm_types
         wasm_types_max
 };
 
-int cwasm_instruction_write(struct cwasm_instruction *self,
+void cwasm_instruction_write(struct cwasm_instruction *self,
                             struct proto_bug *writer)
 {
     if (self->op > 0xff)
@@ -268,11 +268,9 @@ int cwasm_instruction_write(struct cwasm_instruction *self,
         assert(0);
         break;
     }
-
-    return cwasm_error_ok;
 }
 
-int cwasm_instruction_read(struct cwasm_instruction *self,
+void cwasm_instruction_read(struct cwasm_instruction *self,
                            struct proto_bug *reader)
 {
     uint32_t op = proto_bug_read_uint8(reader, "instruction::op");
@@ -340,7 +338,6 @@ int cwasm_instruction_read(struct cwasm_instruction *self,
         assert(0);
         break;
     }
-    return cwasm_error_ok;
 }
 
 void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
@@ -351,7 +348,7 @@ void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
         cwasm_instruction_write(i, writer);
 }
 
-int cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
+void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
                                       struct proto_bug *reader)
 {
     uint64_t depth = 1;
@@ -378,8 +375,6 @@ int cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
         if (depth == 0 && op == cwasm_opcode_end)
             break;
     }
-
-    return cwasm_error_ok;
 }
 
 void cwasm_instruction_free(struct cwasm_instruction *i)
@@ -401,7 +396,7 @@ void cwasm_section_code_free(struct cwasm_section_code *self)
     free(self->locals);
 }
 
-int cwasm_section_code_write(struct cwasm_section_code *self,
+void cwasm_section_code_write(struct cwasm_section_code *self,
                              struct proto_bug *writer)
 {
     static uint8_t code_data[1024 * 1024 * 16];
@@ -444,11 +439,9 @@ int cwasm_section_code_write(struct cwasm_section_code *self,
     proto_bug_write_varuint(writer, byte_count, "code::instructions::size");
     proto_bug_write_string_internal(writer, (char *)code_writer.start,
                                     byte_count);
-
-    return cwasm_error_ok;
 }
 
-int cwasm_section_code_read(struct cwasm_section_code *self,
+void cwasm_section_code_read(struct cwasm_section_code *self,
                             struct proto_bug *reader)
 {
     uint8_t *end = reader->current +
@@ -470,6 +463,4 @@ int cwasm_section_code_read(struct cwasm_section_code *self,
     }
 
     cwasm_instruction_expression_read(&self->expression, reader);
-
-    return cwasm_error_ok;
 }

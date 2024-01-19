@@ -66,7 +66,7 @@ void cwasm_section_element_free(struct cwasm_section_element *self)
         break;                                                                 \
     }
 
-int cwasm_section_element_write(struct cwasm_section_element *self,
+void cwasm_section_element_write(struct cwasm_section_element *self,
                                 struct proto_bug *writer)
 {
 #define expression                                                             \
@@ -102,11 +102,9 @@ int cwasm_section_element_write(struct cwasm_section_element *self,
 #undef table_index
 #undef reference_type
 #undef element_kind
-
-    return cwasm_error_ok;
 }
 
-int cwasm_section_element_read(struct cwasm_section_element *self,
+void cwasm_section_element_read(struct cwasm_section_element *self,
                                struct proto_bug *reader)
 {
 #define expression cwasm_instruction_expression_read(&self->expression, reader);
@@ -145,6 +143,4 @@ int cwasm_section_element_read(struct cwasm_section_element *self,
 #undef table_index
 #undef reference_type
 #undef element_kind
-
-    return cwasm_error_ok;
 }
