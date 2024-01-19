@@ -23,7 +23,7 @@ struct cwasm_module
 
 extern void cwasm_module_init(struct cwasm_module *);
 extern void cwasm_module_free(struct cwasm_module *);
-extern int cwasm_module_read(struct cwasm_module *, uint8_t *begin,
+extern void cwasm_module_read(struct cwasm_module *, uint8_t *begin,
                              uint64_t size);
-extern int cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
+extern void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
                               uint64_t *size);

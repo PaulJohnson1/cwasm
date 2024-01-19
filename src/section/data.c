@@ -14,13 +14,12 @@ void cwasm_section_data_free(struct cwasm_section_data *self)
     free(self->initialization);
 }
 
-int cwasm_section_data_write(struct cwasm_section_data *self,
+void cwasm_section_data_write(struct cwasm_section_data *self,
                              struct proto_bug *writer)
 {
-    return cwasm_error_ok;
 }
 
-int cwasm_section_data_read(struct cwasm_section_data *self,
+void cwasm_section_data_read(struct cwasm_section_data *self,
                             struct proto_bug *reader)
 {
     // reads the initialization bytes
@@ -60,5 +59,4 @@ int cwasm_section_data_read(struct cwasm_section_data *self,
         assert(0);
         break;
     }
-    return cwasm_error_ok;
 }

@@ -13,7 +13,7 @@ void cwasm_section_custom_free(struct cwasm_section_custom *self)
     free(self->bytes);
 }
 
-int cwasm_section_custom_write(struct cwasm_section_custom *self,
+void cwasm_section_custom_write(struct cwasm_section_custom *self,
                                struct proto_bug *writer)
 {
     uint64_t name_size = strlen(self->name);
@@ -24,11 +24,9 @@ int cwasm_section_custom_write(struct cwasm_section_custom *self,
 
     for (uint8_t *i = self->bytes; i < self->bytes_end; i++)
         proto_bug_write_uint8(writer, *i, "custom::bytes");
-
-    return cwasm_error_ok;
 }
 
-int cwasm_section_custom_read(struct cwasm_section_custom *self,
+void cwasm_section_custom_read(struct cwasm_section_custom *self,
                               struct proto_bug *reader)
 {
     uint64_t name_size = proto_bug_read_varuint(reader, "custom::name::size");
@@ -40,6 +38,4 @@ int cwasm_section_custom_read(struct cwasm_section_custom *self,
     self->bytes_end = self->bytes_cap = self->bytes + bytes_size;
     for (uint8_t *i = self->bytes; i < self->bytes_end; i++)
         *i = proto_bug_read_uint8(reader, "custom::bytes");
-
-    return cwasm_error_ok;
 }
