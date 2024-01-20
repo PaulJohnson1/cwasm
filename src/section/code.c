@@ -9,6 +9,7 @@
 #include <pb.h>
 
 #include <consts.h>
+#include <log.h>
 
 // #define X(op, immediate_count, ...)
 #define immediate_opcode_types                                                 \
@@ -217,7 +218,7 @@ enum e_wasm_types
 };
 
 void cwasm_instruction_write(struct cwasm_instruction *self,
-                            struct proto_bug *writer)
+                             struct proto_bug *writer)
 {
     if (self->op > 0xff)
     {
@@ -271,7 +272,7 @@ void cwasm_instruction_write(struct cwasm_instruction *self,
 }
 
 void cwasm_instruction_read(struct cwasm_instruction *self,
-                           struct proto_bug *reader)
+                            struct proto_bug *reader)
 {
     uint32_t op = proto_bug_read_uint8(reader, "instruction::op");
     if (op == 0xfc || op == 0xfd)
@@ -349,7 +350,7 @@ void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
 }
 
 void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
-                                      struct proto_bug *reader)
+                                       struct proto_bug *reader)
 {
     uint64_t depth = 1;
 
@@ -375,6 +376,9 @@ void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
         if (depth == 0 && op == cwasm_opcode_end)
             break;
     }
+
+    cwasm_log("read    end instr expr: size: %lu\n",
+              out->instructions_end - out->instructions);
 }
 
 void cwasm_instruction_free(struct cwasm_instruction *i)
@@ -397,7 +401,7 @@ void cwasm_section_code_free(struct cwasm_section_code *self)
 }
 
 void cwasm_section_code_write(struct cwasm_section_code *self,
-                             struct proto_bug *writer)
+                              struct proto_bug *writer)
 {
     static uint8_t code_data[1024 * 1024 * 16];
     struct proto_bug code_writer;
@@ -442,10 +446,8 @@ void cwasm_section_code_write(struct cwasm_section_code *self,
 }
 
 void cwasm_section_code_read(struct cwasm_section_code *self,
-                            struct proto_bug *reader)
+                             struct proto_bug *reader)
 {
-    uint8_t *end = reader->current +
-                   proto_bug_read_varuint(reader, "code::instructions::size");
     uint64_t local_element_count =
         proto_bug_read_varuint(reader, "code::local::element_size");
 

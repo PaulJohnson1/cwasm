@@ -78,7 +78,7 @@ void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
             proto_bug_write_varuint(&section_writer,                           \
                                     self->name##s_end - self->name##s,         \
                                     "element count");                          \
-            cwasm_log("write     element count: %lu\n",                        \
+            cwasm_log("write   element count: %lu\n",                          \
                       self->name##s_end - self->name##s);                      \
                                                                                \
             for (struct cwasm_section_##name *i = self->name##s;               \
@@ -129,7 +129,7 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
         uint8_t section_id = proto_bug_read_uint8(&reader, "section id");
         uint64_t size = proto_bug_read_varuint(&reader, "section data size");
         uint8_t *expected_end = reader.current + size;
-        cwasm_log("read    begin section id: %d\tsize: %lu\n", section_id, size);
+        cwasm_log("read  section id: %d\tsize: %lu\n", section_id, size);
 
         switch (section_id)
         {
@@ -139,6 +139,7 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
             break;
         case cwasm_const_section_data_count:
             self->data_count = proto_bug_read_varuint(&reader, "data_count");
+            cwasm_log("read    data count: %lu\n", self->data_count);
             break;
 #define concat(a, b) a##b
 #define read_section(name)                                                     \
@@ -146,7 +147,7 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
     {                                                                          \
         uint64_t element_count =                                               \
             proto_bug_read_varuint(&reader, "element count");                  \
-        cwasm_log("read      element count: %lu\n", element_count);            \
+        cwasm_log("read    element count: %lu\n", element_count);              \
         self->name##s = malloc(element_count * sizeof *self->name##s);         \
         memset(self->name##s, 0, element_count * sizeof *self->name##s);       \
         self->name##s_end = self->name##s_cap = self->name##s + element_count; \
@@ -176,7 +177,7 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
         }
         assert(expected_end == reader.current);
 
-        cwasm_log("read    end   section id: %d\n", section_id);
+        cwasm_log("read  end   section id: %d\n", section_id);
     }
     cwasm_log("read  end module\n");
 }
