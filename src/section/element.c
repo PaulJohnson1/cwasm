@@ -6,6 +6,7 @@
 #include <pb.h>
 
 #include <consts.h>
+#include <log.h>
 #include <section/code.h>
 
 enum cwasm_element_segment_mode
@@ -67,12 +68,14 @@ void cwasm_section_element_free(struct cwasm_section_element *self)
     }
 
 void cwasm_section_element_write(struct cwasm_section_element *self,
-                                struct proto_bug *writer)
+                                 struct proto_bug *writer)
 {
 #define expression                                                             \
     cwasm_instruction_expression_write(&self->expression, writer);
 
 #define expression_vector                                                      \
+    cwasm_log("write       elem seg elem expr count: %lu\n",                   \
+              self->expressions_end - self->expressions);                      \
     for (struct cwasm_instruction_expression *i = self->expressions;           \
          i < self->expressions_end; i++)                                       \
         cwasm_instruction_expression_write(i, writer);
@@ -87,14 +90,17 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
     proto_bug_write_varuint(writer, self->table_index, "element::table_index");
 
 #define reference_type                                                         \
-    proto_bug_write_uint8(writer, self->type, "element::type");
+    proto_bug_write_varuint(writer, self->type, "element::type");\
+    cwasm_log("write       elem seg type: %d\n", self->type);
 
 #define element_kind                                                           \
     proto_bug_write_varuint(writer, 0, "element::element_kind");
 
     proto_bug_write_uint8(writer, self->mode_flags, "element::mode_flags");
 
+    cwasm_log("write     begin elem seg: flags: %u\n", self->mode_flags);
     element_instructions;
+    cwasm_log("write     end elem seg\n");
 
 #undef expression
 #undef expression_vector
@@ -105,14 +111,26 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
 }
 
 void cwasm_section_element_read(struct cwasm_section_element *self,
-                               struct proto_bug *reader)
+                                struct proto_bug *reader)
 {
 #define expression cwasm_instruction_expression_read(&self->expression, reader);
 
 #define expression_vector                                                      \
-    cwasm_vector_grow(struct cwasm_instruction_expression, self->expressions); \
-    cwasm_instruction_expression_read(self->expressions_end, reader);          \
-    self->expressions_end++;
+    do                                                                         \
+    {                                                                          \
+        uint64_t count = proto_bug_read_varuint(reader, "element::expr_vec::"  \
+                                                        "count");              \
+        cwasm_log("read        elem seg elem expr count: %lu\n", count);       \
+        if (count)                                                             \
+        {                                                                      \
+            self->expressions = self->expressions_end =                        \
+                self->expressions_cap =                                        \
+                    malloc(count * sizeof *self->expressions);                 \
+            for (struct cwasm_instruction_expression *i = self->expressions;   \
+                 i < self->expressions_end; i++)                               \
+                cwasm_instruction_expression_read(i, reader);                  \
+        }                                                                      \
+    } while (0);
 
 #define initialization                                                         \
     do                                                                         \
@@ -129,16 +147,20 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
                                                        "index");
 
 #define reference_type                                                         \
-    self->type = proto_bug_read_varuint(reader, "element::reference_type");
+    self->type = proto_bug_read_uint8(reader, "element::reference_type");    \
+    cwasm_log("read        elem seg type: %u\n", self->type);
 
 #define element_kind proto_bug_read_varuint(reader, "element::element_kind");
 
     self->mode_flags =
         0b111 & proto_bug_read_uint8(reader, "element::mode_flags");
 
+    cwasm_log("read      begin elem seg: flags: %d\n", self->mode_flags);
     element_instructions;
+    cwasm_log("read      end elem seg\n");
 
 #undef expression
+#undef expression_vector
 #undef initialization
 #undef table_index
 #undef reference_type
