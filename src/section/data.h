@@ -7,24 +7,16 @@
 
 struct proto_bug;
 
-enum cwasm_data_segment_mode
-{
-    cwasm_data_segment_mode_active,
-    cwasm_data_segment_mode_passive,
-    cwasm_data_segment_mode_active_with_memory_index
-};
-
 struct cwasm_section_data
 {
-    enum cwasm_data_segment_mode mode;
-    uint64_t memory_index;
-
-    struct cwasm_instruction_expression offset;
+    struct cwasm_instruction_expression expression;
     cwasm_vector_declare(uint8_t, initialization);
+    uint8_t memory_index;
+    uint8_t mode;
 };
 
 extern void cwasm_section_data_free(struct cwasm_section_data *);
 extern void cwasm_section_data_write(struct cwasm_section_data *,
-                                    struct proto_bug *);
+                                     struct proto_bug *);
 extern void cwasm_section_data_read(struct cwasm_section_data *,
-                                   struct proto_bug *);
+                                    struct proto_bug *);

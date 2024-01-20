@@ -11,10 +11,10 @@ struct cwasm_section_element
 {
     struct cwasm_instruction_expression expression;
     uint64_t table_index;
-    uint64_t type;
     cwasm_vector_declare(uint64_t, init);
     cwasm_vector_declare(struct cwasm_instruction_expression, expressions);
     uint8_t mode_flags;
+    uint8_t type;
 };
 
 extern void cwasm_section_element_free(struct cwasm_section_element *);

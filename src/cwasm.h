@@ -19,6 +19,8 @@ struct cwasm_module
     cwasm_vector_declare(struct cwasm_section_table, tables);
     cwasm_vector_declare(struct cwasm_section_element, elements);
     cwasm_vector_declare(struct cwasm_section_data, datas);
+
+    uint64_t data_count;
 };
 
 extern void cwasm_module_init(struct cwasm_module *);
