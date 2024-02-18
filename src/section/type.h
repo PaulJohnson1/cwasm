@@ -17,9 +17,9 @@ struct cwasm_section_type
     int8_t *signature;
 };
 
-extern void cwasm_section_type_free(struct cwasm_section_type *);
 extern int8_t *cwasm_section_type_get_parameters(struct cwasm_section_type *);
 extern int8_t *cwasm_section_type_get_results(struct cwasm_section_type *);
+extern void cwasm_section_type_free(struct cwasm_section_type *);
 extern void cwasm_section_type_read(struct cwasm_section_type *,
                                    struct proto_bug *);
 extern void cwasm_section_type_write(struct cwasm_section_type *,

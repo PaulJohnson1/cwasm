@@ -347,6 +347,9 @@ void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
     for (struct cwasm_instruction *i = e->instructions; i < e->instructions_end;
          i++)
         cwasm_instruction_write(i, writer);
+
+    cwasm_log("write   end instr expr: size: %lu\n",
+              e->instructions_end - e->instructions);
 }
 
 void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,

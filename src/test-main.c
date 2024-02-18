@@ -25,8 +25,7 @@ void log_hex(uint8_t *start, uint8_t *end)
 struct cwasm_instruction create_instruction(uint64_t op,
                                             uint64_t immediate_count, ...)
 {
-    struct cwasm_instruction instruction;
-    memset(&instruction, 0, sizeof instruction);
+    struct cwasm_instruction instruction = {0};
     instruction.op = op;
     va_list args;
     va_start(args, immediate_count);

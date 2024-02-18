@@ -74,7 +74,9 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
     cwasm_instruction_expression_write(&self->expression, writer);
 
 #define expression_vector                                                      \
-    cwasm_log("write   elem seg elem expr count: %lu\n",                       \
+    proto_bug_write_varuint(writer, self->expressions_end - self->expressions, \
+                            "element::expr_vec::count");                       \
+    cwasm_log("write   elem seg expr vec count: %lu\n",                        \
               self->expressions_end - self->expressions);                      \
     for (struct cwasm_instruction_expression *i = self->expressions;           \
          i < self->expressions_end; i++)                                       \
@@ -127,7 +129,7 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
         {                                                                      \
             self->expressions = malloc(count * sizeof *self->expressions);     \
             self->expressions_end = self->expressions_cap =                    \
-                self->expressions + count;                                      \
+                self->expressions + count;                                     \
                                                                                \
             for (struct cwasm_instruction_expression *i = self->expressions;   \
                  i < self->expressions_end; i++)                               \
@@ -170,3 +172,39 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
 #undef reference_type
 #undef element_kind
 }
+
+/*
+read  section id: 9	size: 13
+read    element count: 3
+read    begin elem seg: flags: 5
+read    elem seg type: 111
+read    elem seg expr vec count: 1
+read    end instr expr: size: 2
+read    end elem seg
+read    begin elem seg: flags: 7
+read    elem seg type: 111
+read    elem seg expr vec count: 0
+read    end elem seg
+read    begin elem seg: flags: 5
+read    elem seg type: 111
+read    elem seg expr vec count: 0
+read    end elem seg
+read  end   section id: 9
+
+write begin section id: 9
+write   element count: 3
+write   begin elem seg: flags: 5
+write   elem seg type: 111
+write   elem seg expr vec count: 1
+write   end instr expr: size: 2
+write   end elem seg
+write   begin elem seg: flags: 7
+write   elem seg type: 111
+write   elem seg expr vec count: 0
+write   end elem seg
+write   begin elem seg: flags: 5
+write   elem seg type: 111
+write   elem seg expr vec count: 0
+write   end elem seg
+write end   section id: 9	size: 10
+*/

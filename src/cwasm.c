@@ -13,6 +13,7 @@
 #include <section/code.h>
 #include <section/custom.h>
 #include <section/data.h>
+#include <section/data_count.h>
 #include <section/element.h>
 #include <section/export.h>
 #include <section/function.h>
@@ -21,14 +22,23 @@
 #include <section/memory.h>
 #include <section/table.h>
 #include <section/type.h>
+#include <util.h>
 
 #define max_section_size (1024 * 1024 * 8)
 
+CWASM_EXPORT
 void cwasm_module_init(struct cwasm_module *self)
 {
     memset(self, 0, sizeof *self);
 }
 
+CWASM_EXPORT
+struct cwasm_module *cwasm_module_new()
+{
+    return calloc(1, sizeof(struct cwasm_module));
+}
+
+CWASM_EXPORT
 void cwasm_module_free(struct cwasm_module *self)
 {
 #define free_section(name)                                                     \
@@ -50,6 +60,7 @@ void cwasm_module_free(struct cwasm_module *self)
     free_section(memory);
     free_section(table);
     free_section(type);
+    free(self->data_count);
 }
 
 void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
@@ -69,7 +80,7 @@ void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
         {                                                                      \
             proto_bug_write_uint8(&writer, cwasm_const_section_##name,         \
                                   "section id");                               \
-            cwasm_log("write   begin section id: %d\n",                        \
+            cwasm_log("write begin section id: %d\n",                          \
                       cwasm_const_section_##name);                             \
             /* must use a separate writer for the section since we must be     \
              * able to get the size and put it before the section data */      \
@@ -87,7 +98,7 @@ void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
                                                                                \
             /* copy section writer over to module writer */                    \
             uint64_t byte_count = proto_bug_get_size(&section_writer);         \
-            cwasm_log("write   end   section id: %d\tsize: %ld\n",             \
+            cwasm_log("write end   section id: %d\tsize: %ld\n",               \
                       cwasm_const_section_##name, byte_count);                 \
             proto_bug_write_varuint(&writer, byte_count, "section data size"); \
             /* want 1:1 copy instead of any debug headers*/                    \
@@ -103,11 +114,25 @@ void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
     write_section(memory);
     write_section(global);
     write_section(export);
-    // write_section(start);
     write_section(element);
     write_section(code);
     write_section(data);
-    // write_section(data_count);
+    if (self->data_count)
+    {
+
+        cwasm_log("write begin section id: %d\n",
+                  cwasm_const_section_data_count);
+        struct proto_bug section_writer;
+        proto_bug_init(&section_writer, section_data);
+        cwasm_section_data_count_write(self->data_count, &section_writer);
+        uint64_t byte_count = proto_bug_get_size(&section_writer);
+        proto_bug_write_varuint(&writer, byte_count, "section data size");
+        proto_bug_write_string_internal(&writer, (char *)section_writer.start,
+                                        byte_count);
+        cwasm_log("write end   section id: %d\tsize: %ld\n",
+                  cwasm_const_section_data_count, byte_count);
+    }
+
 #undef write_section
 
     *size = proto_bug_get_size(&writer);
@@ -138,9 +163,11 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
             cwasm_section_custom_read(self->customs_end++, &reader);
             break;
         case cwasm_const_section_data_count:
-            self->data_count = proto_bug_read_varuint(&reader, "data_count");
-            cwasm_log("read    data count: %lu\n", self->data_count);
+        {
+            self->data_count = malloc(sizeof *self->data_count);
+            cwasm_section_data_count_read(self->data_count, &reader);
             break;
+        }
 #define concat(a, b) a##b
 #define read_section(name)                                                     \
     case cwasm_const_section_##name:                                           \
@@ -164,11 +191,9 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
             read_section(memory);
             read_section(global);
             read_section(export);
-            //  read_section(start);
             read_section(element);
             read_section(code);
             read_section(data);
-//  read_section(data_count);
 #undef read_section
         default:
             fprintf(stderr, "reached invalid section id %d @ %" PRIu64 "\n",

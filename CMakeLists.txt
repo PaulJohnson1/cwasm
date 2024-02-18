@@ -6,6 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(SRCS
     src/section/code.c
     src/section/custom.c
+    src/section/data_count.c
     src/section/data.c
     src/section/element.c
     src/section/export.c
@@ -22,17 +23,17 @@ set(SRCS
 
 include_directories(src)
 
-if(TEST_BUILD)
-    # todo: Paul
-    # add tests
+if(WASM_BUILD)
+    set(CMAKE_C_COMPILER "emcc")
+    #-sEXPORTED_FUNCTIONS=_malloc,_free,_cwasm_module_new
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWASM_BUILD -sTOTAL_MEMORY=1gb")
 else()
-    list(APPEND SRCS "src/test-main.c")
 endif()
 
 if(DEBUG_BUILD)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -gdwarf-4")
 else()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -DPROTO_BUG_NDEBUG -march=native -utune=native")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -DNDEBUG -march=native -utune=native")
 endif()
 
 add_executable(cwasm ${SRCS})

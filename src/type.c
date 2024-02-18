@@ -37,8 +37,8 @@ void cwasm_type_table_write(struct cwasm_type_table *self,
 {
     proto_bug_write_uint8(writer, self->reference_type,
                           "table::reference_type");
-    cwasm_log("write   table: reference_type: %u\n", self->reference_type);
     cwasm_type_limit_write(&self->limit, writer);
+    cwasm_log("write   table: reference_type: %u\n", self->reference_type);
 }
 
 void cwasm_type_table_read(struct cwasm_type_table *self,
@@ -54,6 +54,7 @@ void cwasm_type_memory_write(struct cwasm_type_memory *self,
                              struct proto_bug *writer)
 {
     cwasm_type_limit_write(&self->limit, writer);
+    cwasm_log("write   memory\n");
 }
 
 void cwasm_type_memory_read(struct cwasm_type_memory *self,

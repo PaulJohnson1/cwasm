@@ -20,3 +20,4 @@
     name = malloc(element_count * sizeof *name);                               \
     memset(name, 0, element_count * sizeof *name);                             \
     name##_end = name##_cap = name + size;
+    

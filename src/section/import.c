@@ -25,6 +25,33 @@ void cwasm_section_import_write(struct cwasm_section_import *self,
     proto_bug_write_varuint(writer, name_size, "import::name::size");
     proto_bug_write_string(writer, self->name, name_size, "import::name");
     // cwasm_type_description_write(&self->description, writer);
+
+    proto_bug_write_uint8(writer, self->type, "description::type");
+    switch (self->type)
+    {
+    case 0:
+        proto_bug_write_varuint(writer, self->table_index,
+                                "description::table_index");
+        cwasm_log("write   description: 0: table_index: %lu\n",
+                  self->table_index);
+        break;
+    case 1:
+        cwasm_type_table_write(&self->table, writer);
+        break;
+    case 2:
+        cwasm_type_memory_write(&self->memory, writer);
+        break;
+    case 3:
+        cwasm_type_global_write(&self->global, writer);
+        break;
+    default:
+        assert(0);
+        break;
+    }
+
+    cwasm_log("write   description: type: %u\n", self->type);
+    cwasm_log("write   end import seg: \"%s\"::\"%s\"\n", self->module,
+              self->name);
 }
 
 void cwasm_section_import_read(struct cwasm_section_import *self,
@@ -44,7 +71,9 @@ void cwasm_section_import_read(struct cwasm_section_import *self,
     {
     case 0:
         self->table_index =
-            proto_bug_read_varuint(reader, "description::type_index");
+            proto_bug_read_varuint(reader, "description::table_index");
+        cwasm_log("read    description: 0: table_index: %lu\n",
+                  self->table_index);
         break;
     case 1:
         cwasm_type_table_read(&self->table, reader);
@@ -57,8 +86,10 @@ void cwasm_section_import_read(struct cwasm_section_import *self,
         break;
     default:
         assert(0);
+        break;
     }
+
     cwasm_log("read    description: type: %u\n", self->type);
-    cwasm_log("read    end import seg \"%s\"::\"%s\"\n", self->module,
+    cwasm_log("read    end import seg: \"%s\"::\"%s\"\n", self->module,
               self->name);
 }

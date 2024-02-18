@@ -1,6 +1,7 @@
 #pragma once
 
 #include <consts.h>
+#include <util.h>
 #include <type.h>
 
 struct cwasm_section_import
