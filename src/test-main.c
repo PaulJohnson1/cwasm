@@ -14,6 +14,7 @@
 #include <section/function.h>
 #include <section/import.h>
 #include <section/type.h>
+#include <util.h>
 
 void log_hex(uint8_t *start, uint8_t *end)
 {
@@ -22,6 +23,7 @@ void log_hex(uint8_t *start, uint8_t *end)
     puts("");
 }
 
+CWASM_EXPORT
 struct cwasm_instruction create_instruction(uint64_t op,
                                             uint64_t immediate_count, ...)
 {
@@ -39,6 +41,7 @@ struct cwasm_instruction create_instruction(uint64_t op,
     return instruction;
 }
 
+CWASM_EXPORT
 void set_instructions(struct cwasm_section_code *code, uint64_t count, ...)
 {
     va_list args;
@@ -55,6 +58,7 @@ void set_instructions(struct cwasm_section_code *code, uint64_t count, ...)
     va_end(args);
 }
 
+CWASM_EXPORT
 int main()
 {
     struct cwasm_module module;
@@ -66,24 +70,25 @@ int main()
     cwasm_vector_grow(struct cwasm_section_code, module.codes);
     cwasm_vector_grow(struct cwasm_section_export, module.exports);
 
-    module.imports_end[0].name = strdup("transform"); // they must be on the heap
-    module.imports_end[0].module = strdup("m");
+    module.imports_end->name =
+        strdup("transform"); // they must be on the heap
+    module.imports_end->module = strdup("m");
 
-    module.types_end[0].signature = malloc(3);
-    module.types_end[0].parameters_size = 1;
-    module.types_end[0].results_size = 1;
+    module.types_end->signature = malloc(3);
+    module.types_end->parameters_size = 1;
+    module.types_end->results_size = 1;
     cwasm_section_type_get_parameters(module.types_end)[0] = 127;
     cwasm_section_type_get_results(module.types_end)[0] = 127;
 
-    module.functions_end[0].type_index = 0;
+    module.functions_end->type_index = 0;
 
-    module.codes_end[0].locals = malloc(1);
-    module.codes_end[0].locals_end = module.codes_end[0].locals + 1;
-    module.codes_end[0].locals_cap = module.codes_end[0].locals + 1;
-    module.codes_end[0].locals[0] = 127;
-    module.codes_end[0].expression.instructions = 0;
-    module.codes_end[0].expression.instructions_end = 0;
-    module.codes_end[0].expression.instructions_cap = 0;
+    module.codes_end->locals = malloc(1);
+    module.codes_end->locals_end = module.codes_end->locals + 1;
+    module.codes_end->locals_cap = module.codes_end->locals + 1;
+    module.codes_end->locals[0] = 127;
+    module.codes_end->expression.instructions = 0;
+    module.codes_end->expression.instructions_end = 0;
+    module.codes_end->expression.instructions_cap = 0;
     set_instructions(module.codes_end, 5,
                      create_instruction(cwasm_opcode_i32_const, 1, 123),
                      create_instruction(cwasm_opcode_i32_const, 1, 1234),
@@ -91,8 +96,8 @@ int main()
                      create_instruction(cwasm_opcode_call, 1, 0),
                      create_instruction(cwasm_opcode_end, 0));
 
-    // module.exports_end[0].name = strdup("lolol");
-    // module.exports_end[0].type = 1;
+    // module.exports_end->name = strdup("lolol");
+    // module.exports_end->type = 1;
 
     module.imports_end++;
     module.types_end++;

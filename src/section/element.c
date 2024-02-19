@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include <pb.h>
 
@@ -76,7 +77,7 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
 #define expression_vector                                                      \
     proto_bug_write_varuint(writer, self->expressions_end - self->expressions, \
                             "element::expr_vec::count");                       \
-    cwasm_log("write   elem seg expr vec count: %lu\n",                        \
+    cwasm_log("write   elem seg expr vec count: %" PRIuPTR "\n",                        \
               self->expressions_end - self->expressions);                      \
     for (struct cwasm_instruction_expression *i = self->expressions;           \
          i < self->expressions_end; i++)                                       \
@@ -91,7 +92,7 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
 #define table_index                                                            \
     proto_bug_write_varuint(writer, self->table_index,                         \
                             "element::table_index");                           \
-    cwasm_log("write   elem seg table_index: %lu\n", self->table_index);
+    cwasm_log("write   elem seg table_index: %" PRIu64 "\n", self->table_index);
 
 #define reference_type                                                         \
     proto_bug_write_varuint(writer, self->type, "element::type");              \
@@ -124,7 +125,7 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
     {                                                                          \
         uint64_t count = proto_bug_read_varuint(reader, "element::expr_vec::"  \
                                                         "count");              \
-        cwasm_log("read    elem seg expr vec count: %lu\n", count);            \
+        cwasm_log("read    elem seg expr vec count: %" PRIu64 "\n", count);            \
         if (count)                                                             \
         {                                                                      \
             self->expressions = malloc(count * sizeof *self->expressions);     \
@@ -150,7 +151,7 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
 #define table_index                                                            \
     self->table_index = proto_bug_read_varuint(reader, "element::table_"       \
                                                        "index");               \
-    cwasm_log("read    elem seg table_index: %lu\n", self->table_index);
+    cwasm_log("read    elem seg table_index: %" PRIu64 "\n", self->table_index);
 
 #define reference_type                                                         \
     self->type = proto_bug_read_uint8(reader, "element::reference_type");      \
@@ -172,39 +173,3 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
 #undef reference_type
 #undef element_kind
 }
-
-/*
-read  section id: 9	size: 13
-read    element count: 3
-read    begin elem seg: flags: 5
-read    elem seg type: 111
-read    elem seg expr vec count: 1
-read    end instr expr: size: 2
-read    end elem seg
-read    begin elem seg: flags: 7
-read    elem seg type: 111
-read    elem seg expr vec count: 0
-read    end elem seg
-read    begin elem seg: flags: 5
-read    elem seg type: 111
-read    elem seg expr vec count: 0
-read    end elem seg
-read  end   section id: 9
-
-write begin section id: 9
-write   element count: 3
-write   begin elem seg: flags: 5
-write   elem seg type: 111
-write   elem seg expr vec count: 1
-write   end instr expr: size: 2
-write   end elem seg
-write   begin elem seg: flags: 7
-write   elem seg type: 111
-write   elem seg expr vec count: 0
-write   end elem seg
-write   begin elem seg: flags: 5
-write   elem seg type: 111
-write   elem seg expr vec count: 0
-write   end elem seg
-write end   section id: 9	size: 10
-*/

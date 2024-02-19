@@ -334,7 +334,8 @@ void cwasm_instruction_read(struct cwasm_instruction *self,
 
     default:
         fprintf(stderr,
-                "invalid opcode found while reading: %02lx %" PRId64 "u\n",
+                "invalid opcode found while reading: %02" PRId64 "x %" PRId64
+                "u\n",
                 self->op, self->op);
         assert(0);
         break;
@@ -348,7 +349,7 @@ void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
          i++)
         cwasm_instruction_write(i, writer);
 
-    cwasm_log("write   end instr expr: size: %lu\n",
+    cwasm_log("write   end instr expr: size: %" PRIuPTR "\n",
               e->instructions_end - e->instructions);
 }
 
@@ -380,7 +381,7 @@ void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
             break;
     }
 
-    cwasm_log("read    end instr expr: size: %lu\n",
+    cwasm_log("read    end instr expr: size: %" PRIuPTR "\n",
               out->instructions_end - out->instructions);
 }
 

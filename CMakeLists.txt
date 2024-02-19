@@ -19,13 +19,15 @@ set(SRCS
     src/type.c
     src/cwasm.c
     src/pb.c
+
+    src/test-main.c
 )
 
 include_directories(src)
 
 if(WASM_BUILD)
     set(CMAKE_C_COMPILER "emcc")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWASM_BUILD -sTOTAL_MEMORY=1gb -sEXPORTED_FUNCTIONS=_malloc,_free")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWASM_BUILD -sTOTAL_MEMORY=1gb -sEXPORTED_FUNCTIONS=_main,_malloc,_free")
 else()
 endif()
 

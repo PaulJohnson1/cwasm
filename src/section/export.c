@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <inttypes.h>
 
 #include <pb.h>
 
@@ -26,7 +27,7 @@ void cwasm_section_export_write(struct cwasm_section_export *self,
     case 0:
         proto_bug_write_varuint(writer, self->table_index,
                                 "description::table_index");
-        cwasm_log("write   description: 0: table_index: %lu\n",
+        cwasm_log("write   description: 0: table_index: %" PRIu64 "\n",
                   self->table_index);
         break;
     case 1:

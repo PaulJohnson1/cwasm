@@ -1,6 +1,7 @@
 #include <section/data.h>
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdlib.h>
 
 #include <pb.h>
@@ -38,7 +39,7 @@ void cwasm_section_data_write(struct cwasm_section_data *self,
 #define initialization                                                         \
     for (uint8_t *i = self->initialization; i < self->initialization_end; i++) \
         proto_bug_write_uint8(writer, *i, "data::init");                       \
-    cwasm_log("write   data seg init size: %lu\n",                             \
+    cwasm_log("write   data seg init size: %" PRIuPTR "\n",                    \
               self->initialization_end - self->initialization);
 
 #define expression                                                             \
@@ -66,7 +67,7 @@ void cwasm_section_data_read(struct cwasm_section_data *self,
     do                                                                         \
     {                                                                          \
         uint64_t max = proto_bug_read_varuint(reader, "data::init_size");      \
-        cwasm_log("read    data seg init size: %lu\n", max);                   \
+        cwasm_log("read    data seg init size: %" PRIu64 "\n", max);           \
         for (uint64_t i = 0; i < max; i++)                                     \
         {                                                                      \
             cwasm_vector_grow(uint8_t, self->initialization);                  \

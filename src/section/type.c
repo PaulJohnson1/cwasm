@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <pb.h>
 
@@ -40,7 +41,7 @@ void cwasm_section_type_write(struct cwasm_section_type *self,
     proto_bug_write_varuint(writer, self->results_size, "results size");
     proto_bug_write_string(writer, (char *)cwasm_section_type_get_results(self),
                            self->results_size, "results");
-    cwasm_log("write   type seg: param_size: %lu\t results_size: %lu\n",
+    cwasm_log("write   type seg: param_size: %" PRIu64 "\t results_size: %" PRIu64 "\n",
               self->parameters_size, self->results_size);
 }
 
@@ -61,6 +62,6 @@ void cwasm_section_type_read(struct cwasm_section_type *self,
            self->parameters_size);
     proto_bug_read_string(reader, (char *)cwasm_section_type_get_results(self),
                           self->results_size, "results");
-    cwasm_log("read    type seg: param_size: %lu\t results_size: %lu\n",
+    cwasm_log("read    type seg: param_size: %" PRIu64 "\t results_size: %" PRIu64 "\n",
               self->parameters_size, self->results_size);
 }
