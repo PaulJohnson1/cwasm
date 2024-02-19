@@ -1,6 +1,7 @@
 #include <type.h>
 
 #include <assert.h>
+#include <inttypes.h>
 
 #include <pb.h>
 
@@ -17,8 +18,8 @@ void cwasm_type_limit_write(struct cwasm_type_limit *self,
     proto_bug_write_varuint(writer, self->min, "limit::min");
     if (flags & 1)
         proto_bug_write_varuint(writer, self->max, "limit::max");
-    cwasm_log("write   limit: flags:%u\tmin:%lu\tmax:%lu\n", flags, self->min,
-              self->max);
+    cwasm_log("write   limit: flags:%u\tmin:%" PRIu64 "\tmax:%" PRIu64 "\n",
+              flags, self->min, self->max);
 }
 
 void cwasm_type_limit_read(struct cwasm_type_limit *self,
@@ -28,8 +29,8 @@ void cwasm_type_limit_read(struct cwasm_type_limit *self,
     self->min = proto_bug_read_varuint(reader, "limit::min");
     self->max =
         flags & 1 ? proto_bug_read_varuint(reader, "limit::max") : UINT64_MAX;
-    cwasm_log("read    limit: flags:%u\tmin:%lu\tmax:%lu\n", flags, self->min,
-              self->max);
+    cwasm_log("read    limit: flags:%u\tmin:%" PRIu64 "\tmax:%" PRIu64 "\n",
+              flags, self->min, self->max);
 }
 
 void cwasm_type_table_write(struct cwasm_type_table *self,
@@ -69,7 +70,7 @@ void cwasm_type_global_write(struct cwasm_type_global *self,
 {
     proto_bug_write_uint8(writer, self->value_type, "global::value_type");
     proto_bug_write_varuint(writer, self->flags, "global::flags");
-    cwasm_log("write   global: value_type: %u\tflags: %lu\n", self->value_type,
+    cwasm_log("write   global: value_type: %u\tflags: %" PRIu64 "\n", self->value_type,
               self->flags);
 }
 
@@ -79,6 +80,6 @@ void cwasm_type_global_read(struct cwasm_type_global *self,
     self->value_type = proto_bug_read_uint8(reader, "global::value_type");
     self->flags = proto_bug_read_varuint(reader, "global::flags");
 
-    cwasm_log("read    global: value_type: %u\tflags: %lu\n", self->value_type,
+    cwasm_log("read    global: value_type: %u\tflags: %" PRIu64 "\n", self->value_type,
               self->flags);
 }

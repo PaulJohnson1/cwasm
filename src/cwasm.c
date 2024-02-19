@@ -22,23 +22,19 @@
 #include <section/memory.h>
 #include <section/table.h>
 #include <section/type.h>
-#include <util.h>
 
 #define max_section_size (1024 * 1024 * 8)
 
-CWASM_EXPORT
 void cwasm_module_init(struct cwasm_module *self)
 {
     memset(self, 0, sizeof *self);
 }
 
-CWASM_EXPORT
 struct cwasm_module *cwasm_module_new()
 {
     return calloc(1, sizeof(struct cwasm_module));
 }
 
-CWASM_EXPORT
 void cwasm_module_free(struct cwasm_module *self)
 {
 #define free_section(name)                                                     \
@@ -63,8 +59,30 @@ void cwasm_module_free(struct cwasm_module *self)
     free(self->data_count);
 }
 
-void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
-                        uint64_t *size)
+#define x(section)                                                             \
+    struct cwasm_section_##section *cwasm_module_get_##section##s(             \
+        struct cwasm_module *self)                                             \
+    {                                                                          \
+        return self->section##s;                                               \
+    }                                                                          \
+    uint64_t cwasm_##section##_get_byte_size()                                 \
+    {                                                                          \
+        return sizeof(struct cwasm_section_##section);                         \
+    }                                                                          \
+    uint64_t cwasm_module_get_##section##_size(struct cwasm_module *self)      \
+    {                                                                          \
+        return self->section##s_end - self->section##s;                        \
+    }                                                                          \
+    void cwasm_module_grow_##section(struct cwasm_module *self)                \
+    {                                                                          \
+        cwasm_vector_grow(struct cwasm_section_##section, self->section##s);   \
+    }
+
+cwasm_sections(x)
+#undef x
+
+    void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
+                            uint64_t *size)
 {
     cwasm_log("write begin module\n");
     struct proto_bug writer;
@@ -89,7 +107,7 @@ void cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
             proto_bug_write_varuint(&section_writer,                           \
                                     self->name##s_end - self->name##s,         \
                                     "element count");                          \
-            cwasm_log("write   element count: %lu\n",                          \
+            cwasm_log("write   element count: %" PRIuPTR "\n",                 \
                       self->name##s_end - self->name##s);                      \
                                                                                \
             for (struct cwasm_section_##name *i = self->name##s;               \
@@ -154,7 +172,8 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
         uint8_t section_id = proto_bug_read_uint8(&reader, "section id");
         uint64_t size = proto_bug_read_varuint(&reader, "section data size");
         uint8_t *expected_end = reader.current + size;
-        cwasm_log("read  section id: %d\tsize: %lu\n", section_id, size);
+        cwasm_log("read  section id: %d\tsize: %" PRId64 "u\n", section_id,
+                  size);
 
         switch (section_id)
         {
@@ -174,11 +193,10 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
     {                                                                          \
         uint64_t element_count =                                               \
             proto_bug_read_varuint(&reader, "element count");                  \
-        cwasm_log("read    element count: %lu\n", element_count);              \
+        cwasm_log("read    element count: %" PRIu64 "u\n", element_count);     \
         self->name##s = malloc(element_count * sizeof *self->name##s);         \
         memset(self->name##s, 0, element_count * sizeof *self->name##s);       \
         self->name##s_end = self->name##s_cap = self->name##s + element_count; \
-        /*cwasm_vector_set_size(name, s), element_count)*/                     \
         for (struct cwasm_section_##name *i = self->name##s;                   \
              i < self->name##s_end; i++)                                       \
             cwasm_section_##name##_read(i, &reader);                           \

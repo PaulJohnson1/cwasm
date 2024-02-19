@@ -25,8 +25,7 @@ include_directories(src)
 
 if(WASM_BUILD)
     set(CMAKE_C_COMPILER "emcc")
-    #-sEXPORTED_FUNCTIONS=_malloc,_free,_cwasm_module_new
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWASM_BUILD -sTOTAL_MEMORY=1gb")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWASM_BUILD -sTOTAL_MEMORY=1gb -sEXPORTED_FUNCTIONS=_malloc,_free")
 else()
 endif()
 

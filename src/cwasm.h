@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <consts.h>
 #include <util.h>
 #include <vector.h>
 
@@ -24,9 +25,19 @@ struct cwasm_module
 };
 
 CWASM_EXPORT extern struct cwasm_module *cwasm_module_new();
+CWASM_EXPORT extern void cwasm_module_init(struct cwasm_module *);
+CWASM_EXPORT extern void cwasm_module_free(struct cwasm_module *);
+CWASM_EXPORT extern void cwasm_module_read(struct cwasm_module *,
+                                           uint8_t *begin, uint64_t size);
+CWASM_EXPORT extern void cwasm_module_write(struct cwasm_module *self,
+                                            uint8_t *begin, uint64_t *size);
 
-CWASM_EXPORT extern void cwasm_module_init(struct cwasm_module *),
-    cwasm_module_free(struct cwasm_module *),
-    cwasm_module_read(struct cwasm_module *, uint8_t *begin, uint64_t size),
-    cwasm_module_write(struct cwasm_module *self, uint8_t *begin,
-                       uint64_t *size);
+#define x(section)                                                             \
+    CWASM_EXPORT extern struct cwasm_section_##section                         \
+        *cwasm_module_get_##section##s(struct cwasm_module *);                 \
+    CWASM_EXPORT extern uint64_t cwasm_##section##_get_byte_size();             \
+    CWASM_EXPORT extern uint64_t cwasm_module_get_##section##_size(                \
+        struct cwasm_module *);                                                \
+    CWASM_EXPORT extern void cwasm_module_grow_##section(struct cwasm_module *);
+cwasm_sections(x);
+#undef x
