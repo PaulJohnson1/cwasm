@@ -58,8 +58,29 @@ void set_instructions(struct cwasm_section_code *code, uint64_t count, ...)
     va_end(args);
 }
 
-CWASM_EXPORT
-int main()
+struct cwasm_module read_module_from_file(char const *name)
+{
+    FILE *file = fopen(name, "rb");
+    fseek(file, 0, SEEK_END);
+    size_t size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    unsigned char *data = malloc(size);
+
+    if (fread(data, 1, size, file) != size)
+        perror("Failed to read file");
+    fclose(file);
+
+    struct proto_bug reader;
+    proto_bug_init(&reader, data);
+    struct cwasm_module readed_module;
+    cwasm_module_init(&readed_module);
+    cwasm_module_read(&readed_module, data, size);
+
+    return readed_module;
+}
+
+void test_create_module()
 {
     struct cwasm_module module;
     cwasm_module_init(&module);
@@ -83,8 +104,7 @@ int main()
     module.functions_end->type_index = 0;
 
     module.codes_end->locals = malloc(1);
-    module.codes_end->locals_end = module.codes_end->locals + 1;
-    module.codes_end->locals_cap = module.codes_end->locals + 1;
+    module.codes_end->locals_end = module.codes_end->locals_cap = module.codes_end->locals + 1;
     module.codes_end->locals[0] = 127;
     module.codes_end->expression.instructions = 0;
     module.codes_end->expression.instructions_end = 0;
@@ -105,39 +125,27 @@ int main()
     module.codes_end++;
     module.exports_end++;
 
+    cwasm_module_free(&module);
+}
+
+void test_read_sample()
+{
+    struct cwasm_module module = read_module_from_file("sample.wasm");
+    cwasm_module_free(&module);
+}
+
+CWASM_EXPORT
+int main()
+{
+    // test_create_module();
+
     // static uint8_t data[1024 * 1024];
     // uint64_t size;
     // int err = cwasm_module_write(&module, data, &size);
     // assert(!err);
     // log_hex(data, data + size);
 
-    // FILE *file = fopen("sample.wasm", "rb");
-    // // Seek to the end of the file to determine its size
-    // fseek(file, 0, SEEK_END);
-    // size_t size = ftell(file);
-    // fseek(file, 0, SEEK_SET); // Seek back to the start of the file
-
-    // // Allocate memory to hold the file data
-    // unsigned char *data = malloc(size);
-
-    // // Read the file into memory
-    // if (fread(data, 1, size, file) != size)
-    // {
-    //     perror("Failed to read file");
-    // }
-    // // Close the file as it is no longer needed
-    // fclose(file);
-
-    // struct proto_bug reader;
-    // proto_bug_init(&reader, data);
-    // struct cwasm_module readed_module;
-    // cwasm_module_init(&readed_module);
-    // int err = cwasm_module_read(&readed_module, data, size);
-    // // log_hex(data, data + size);
-    // printf("%d\n", err);
-
-    // cwasm_module_free(&readed_module);
-    cwasm_module_free(&module);
+    test_read_sample();
 
     return 0;
 

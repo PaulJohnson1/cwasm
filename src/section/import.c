@@ -28,6 +28,10 @@ void cwasm_section_import_write(struct cwasm_section_import *self,
     // cwasm_type_description_write(&self->description, writer);
 
     proto_bug_write_uint8(writer, self->type, "description::type");
+
+    cwasm_log("write   import seg: \"%s\"::\"%s\"\n", self->module,
+              self->name);
+
     switch (self->type)
     {
     case 0:
@@ -50,9 +54,6 @@ void cwasm_section_import_write(struct cwasm_section_import *self,
         break;
     }
 
-    cwasm_log("write   description: type: %u\n", self->type);
-    cwasm_log("write   end import seg: \"%s\"::\"%s\"\n", self->module,
-              self->name);
 }
 
 void cwasm_section_import_read(struct cwasm_section_import *self,
@@ -67,6 +68,9 @@ void cwasm_section_import_read(struct cwasm_section_import *self,
     proto_bug_read_string(reader, self->name, name_size, "import::name");
 
     self->type = proto_bug_read_uint8(reader, "description::type");
+
+    cwasm_log("read    import seg: \"%s\"::\"%s\"\n", self->module,
+              self->name);
 
     switch (self->type)
     {
@@ -89,8 +93,4 @@ void cwasm_section_import_read(struct cwasm_section_import *self,
         assert(0);
         break;
     }
-
-    cwasm_log("read    description: type: %u\n", self->type);
-    cwasm_log("read    end import seg: \"%s\"::\"%s\"\n", self->module,
-              self->name);
 }
