@@ -6,11 +6,12 @@
 #include <pb.h>
 
 #include <consts.h>
+#include <log.h>
 
 void cwasm_section_table_free(struct cwasm_section_table *self) {}
 
 void cwasm_section_table_write(struct cwasm_section_table *self,
-                              struct proto_bug *writer)
+                               struct proto_bug *writer)
 {
     proto_bug_write_varuint(writer, self->type, "table::type");
     uint8_t flags = 0;
@@ -20,14 +21,20 @@ void cwasm_section_table_write(struct cwasm_section_table *self,
     proto_bug_write_varuint(writer, self->min, "table::min");
     if (flags & 1)
         proto_bug_write_varuint(writer, self->max, "table::max");
+
+    cwasm_log("write   type: %lu, min: %lu, max: %lu\n", self->type, self->min,
+              self->max);
 }
 
 void cwasm_section_table_read(struct cwasm_section_table *self,
-                             struct proto_bug *reader)
+                              struct proto_bug *reader)
 {
     self->type = proto_bug_read_varuint(reader, "table::type");
     uint8_t flags = proto_bug_read_uint8(reader, "table::flags");
     self->min = proto_bug_read_varuint(reader, "table::min");
     self->max =
         flags & 1 ? proto_bug_read_varuint(reader, "table::max") : UINT64_MAX;
+
+    cwasm_log("read    type: %lu, min: %lu, max: %lu\n", self->type, self->min,
+              self->max);
 }

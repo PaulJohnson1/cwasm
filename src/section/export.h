@@ -10,13 +10,7 @@ struct proto_bug;
 struct cwasm_section_export
 {
 
-    union
-    {
-        uint64_t table_index;
-        uint64_t memory_index;
-        struct cwasm_type_table table;
-        struct cwasm_type_global global;
-    };
+    uint64_t index;
     char *name;
     uint8_t type;
 };

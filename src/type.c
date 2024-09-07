@@ -18,8 +18,8 @@ void cwasm_type_limit_write(struct cwasm_type_limit *self,
     proto_bug_write_varuint(writer, self->min, "limit::min");
     if (flags & 1)
         proto_bug_write_varuint(writer, self->max, "limit::max");
-    cwasm_log("write   limit: flags:%u\tmin:%" PRIu64 "\tmax:%" PRIu64 "\n",
-              flags, self->min, self->max);
+    // cwasm_log("write   limit: flags:%u\tmin:%" PRIu64 "\tmax:%" PRIu64 "\n",
+    //           flags, self->min, self->max);
 }
 
 void cwasm_type_limit_read(struct cwasm_type_limit *self,
@@ -29,8 +29,8 @@ void cwasm_type_limit_read(struct cwasm_type_limit *self,
     self->min = proto_bug_read_varuint(reader, "limit::min");
     self->max =
         flags & 1 ? proto_bug_read_varuint(reader, "limit::max") : UINT64_MAX;
-    cwasm_log("read    limit: flags:%u\tmin:%" PRIu64 "\tmax:%" PRIu64 "\n",
-              flags, self->min, self->max);
+    // cwasm_log("read    limit: flags:%u\tmin:%" PRIu64 "\tmax:%" PRIu64 "\n",
+    //           flags, self->min, self->max);
 }
 
 void cwasm_type_table_write(struct cwasm_type_table *self,
@@ -39,7 +39,7 @@ void cwasm_type_table_write(struct cwasm_type_table *self,
     proto_bug_write_uint8(writer, self->reference_type,
                           "table::reference_type");
     cwasm_type_limit_write(&self->limit, writer);
-    cwasm_log("write   table: reference_type: %u\n", self->reference_type);
+    // cwasm_log("write   table: reference_type: %u\n", self->reference_type);
 }
 
 void cwasm_type_table_read(struct cwasm_type_table *self,
@@ -48,7 +48,7 @@ void cwasm_type_table_read(struct cwasm_type_table *self,
     self->reference_type =
         proto_bug_read_uint8(reader, "table::reference_type");
     cwasm_type_limit_read(&self->limit, reader);
-    cwasm_log("read    table: reference_type: %u\n", self->reference_type);
+    // cwasm_log("read    table: reference_type: %u\n", self->reference_type);
 }
 
 void cwasm_type_memory_write(struct cwasm_type_memory *self,

@@ -347,7 +347,10 @@ void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
 {
     for (struct cwasm_instruction *i = e->instructions; i < e->instructions_end;
          i++)
+    {
+        cwasm_log("write   instr: op: %lu\n", i->op);
         cwasm_instruction_write(i, writer);
+    }
 
     cwasm_log("write   end instr expr: size: %" PRIuPTR "\n",
               e->instructions_end - e->instructions);
@@ -358,11 +361,14 @@ void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
 {
     uint64_t depth = 1;
 
+    cwasm_log("read    begin expr\n");
+
     while (1)
     {
         cwasm_vector_grow(struct cwasm_instruction, out->instructions);
         cwasm_instruction_read(out->instructions_end, reader);
         uint64_t op = out->instructions_end->op;
+        cwasm_log("read    instr: op: %lu\n", op);
         out->instructions_end++;
         switch (op)
         {
