@@ -58,19 +58,25 @@ void set_instructions(struct cwasm_section_code *code, uint64_t count, ...)
     va_end(args);
 }
 
-struct cwasm_module read_module_from_file(char const *name)
+void read_bytes_from_file(char const *name, uint8_t **data, uint64_t *size)
 {
     FILE *file = fopen(name, "rb");
     fseek(file, 0, SEEK_END);
-    size_t size = ftell(file);
+    *size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    unsigned char *data = malloc(size);
+    *data = malloc(*size);
 
-    if (fread(data, 1, size, file) != size)
+    if (fread(*data, 1, *size, file) != *size)
         perror("Failed to read file");
     fclose(file);
+}
 
+struct cwasm_module read_module_from_file(char const *name)
+{
+    uint8_t *data;
+    uint64_t size;
+    read_bytes_from_file(name, &data, &size);
     struct proto_bug reader;
     proto_bug_init(&reader, data);
     struct cwasm_module readed_module;
@@ -78,6 +84,18 @@ struct cwasm_module read_module_from_file(char const *name)
     cwasm_module_read(&readed_module, data, size);
 
     return readed_module;
+}
+
+void save_module_to_file(struct cwasm_module *module, char const *name)
+{
+    static uint8_t bytes[1024 * 1024 * 128];
+    uint64_t size = 0;
+    cwasm_module_write(module, bytes, &size);
+    FILE *outwasm = fopen(name, "wb");
+    size_t written = fwrite(bytes, 1, size, outwasm);
+    if (written != size)
+        assert(0);
+    fclose(outwasm);
 }
 
 void test_create_module()
@@ -91,8 +109,7 @@ void test_create_module()
     cwasm_vector_grow(struct cwasm_section_code, module.codes);
     cwasm_vector_grow(struct cwasm_section_export, module.exports);
 
-    module.imports_end->name =
-        strdup("transform"); // they must be on the heap
+    module.imports_end->name = strdup("transform"); // they must be on the heap
     module.imports_end->module = strdup("m");
 
     module.types_end->signature = malloc(3);
@@ -104,7 +121,8 @@ void test_create_module()
     module.functions_end->type_index = 0;
 
     module.codes_end->locals = malloc(1);
-    module.codes_end->locals_end = module.codes_end->locals_cap = module.codes_end->locals + 1;
+    module.codes_end->locals_end = module.codes_end->locals_cap =
+        module.codes_end->locals + 1;
     module.codes_end->locals[0] = 127;
     module.codes_end->expression.instructions = 0;
     module.codes_end->expression.instructions_end = 0;
@@ -128,10 +146,33 @@ void test_create_module()
     cwasm_module_free(&module);
 }
 
-void test_read_sample()
+void test_read_write_sample()
 {
     struct cwasm_module module = read_module_from_file("sample.wasm");
+    save_module_to_file(&module, "sample.mod.wasm");
     cwasm_module_free(&module);
+}
+
+void test_find_first_diff()
+{
+    uint8_t *original_data;
+    uint64_t original_size;
+    uint8_t *mod_data;
+    uint64_t mod_size;
+
+    read_bytes_from_file("sample.wasm", &original_data, &original_size);
+    read_bytes_from_file("sample.mod.wasm", &mod_data, &mod_size);
+
+    uint64_t min_size = original_size < mod_size ? original_size : mod_size;
+
+    for (uint64_t i = 0; i < mod_size; i++)
+    {
+        if (original_data[i] != mod_data[i])
+        {
+            fprintf(stderr, "diff at %08lx\n", i);
+            exit(1);
+        }
+    }
 }
 
 CWASM_EXPORT
@@ -145,7 +186,8 @@ int main()
     // assert(!err);
     // log_hex(data, data + size);
 
-    test_read_sample();
+    test_read_write_sample();
+    test_find_first_diff();
 
     return 0;
 
@@ -161,11 +203,6 @@ int main()
     // uint64_t new_size;
     // cwasm_module_write(&module, new_data, &new_size);
     // cwasm_module_free(&module);
-    // FILE *outwasm = fopen("out.wasm", "wb");
-    // size_t written = fwrite(new_data, 1, new_size, outwasm);
-    // if (written != new_size)
-    //     assert(0);
-    // fclose(outwasm);
 
     // fclose(file);
     // free(data);

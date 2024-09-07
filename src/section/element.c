@@ -1,8 +1,8 @@
 #include <section/element.h>
 
 #include <assert.h>
-#include <stdlib.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 #include <pb.h>
 
@@ -32,21 +32,21 @@ void cwasm_section_element_free(struct cwasm_section_element *self)
     {                                                                          \
     case 0:                                                                    \
         expression;                                                            \
-        initialization;                                                        \
+        funcidx_vector;                                                        \
         break;                                                                 \
     case 1:                                                                    \
         element_kind;                                                          \
-        initialization;                                                        \
+        funcidx_vector;                                                        \
         break;                                                                 \
     case 2:                                                                    \
         table_index;                                                           \
         expression;                                                            \
         element_kind;                                                          \
-        initialization;                                                        \
+        funcidx_vector;                                                        \
         break;                                                                 \
     case 3:                                                                    \
         element_kind;                                                          \
-        initialization;                                                        \
+        funcidx_vector;                                                        \
         break;                                                                 \
     case 4:                                                                    \
         expression;                                                            \
@@ -72,22 +72,29 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
                                  struct proto_bug *writer)
 {
 #define expression                                                             \
+    cwasm_log("write   begin elem segment init expr\n");                       \
     cwasm_instruction_expression_write(&self->expression, writer);
 
 #define expression_vector                                                      \
     proto_bug_write_varuint(writer, self->expressions_end - self->expressions, \
                             "element::expr_vec::count");                       \
-    cwasm_log("write   elem seg expr vec count: %" PRIuPTR "\n",                        \
+    cwasm_log("write   elem seg expr vec count: %" PRIuPTR "\n",               \
               self->expressions_end - self->expressions);                      \
     for (struct cwasm_instruction_expression *i = self->expressions;           \
          i < self->expressions_end; i++)                                       \
         cwasm_instruction_expression_write(i, writer);
 
-#define initialization                                                         \
+#define funcidx_vector                                                         \
+    cwasm_log("write   elem segment type\n");                                  \
     proto_bug_write_varuint(writer, self->init_end - self->init,               \
                             "element::init_size");                             \
+    cwasm_log("write   elem seg func idx count: %lu\n",                        \
+              self->init_end - self->init);                                    \
     for (uint64_t *i = self->init; i < self->init_end; i++)                    \
-        proto_bug_write_varuint(writer, *i, "element::init");
+    {                                                                          \
+        proto_bug_write_varuint(writer, *i, "element::init");                  \
+        cwasm_log("write   elem seg func idx: %lu\n", *i);                     \
+    }
 
 #define table_index                                                            \
     proto_bug_write_varuint(writer, self->table_index,                         \
@@ -109,7 +116,7 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
 
 #undef expression
 #undef expression_vector
-#undef initialization
+#undef funcidx_vector
 #undef table_index
 #undef reference_type
 #undef element_kind
@@ -118,14 +125,16 @@ void cwasm_section_element_write(struct cwasm_section_element *self,
 void cwasm_section_element_read(struct cwasm_section_element *self,
                                 struct proto_bug *reader)
 {
-#define expression cwasm_instruction_expression_read(&self->expression, reader);
+#define expression                                                             \
+    cwasm_log("read    begin elem segment init expr\n");                       \
+    cwasm_instruction_expression_read(&self->expression, reader);
 
 #define expression_vector                                                      \
     do                                                                         \
     {                                                                          \
         uint64_t count = proto_bug_read_varuint(reader, "element::expr_vec::"  \
                                                         "count");              \
-        cwasm_log("read    elem seg expr vec count: %" PRIu64 "\n", count);            \
+        cwasm_log("read    elem seg expr vec count: %" PRIu64 "\n", count);    \
         if (count)                                                             \
         {                                                                      \
             self->expressions = malloc(count * sizeof *self->expressions);     \
@@ -138,14 +147,19 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
         }                                                                      \
     } while (0);
 
-#define initialization                                                         \
+#define funcidx_vector                                                         \
     do                                                                         \
     {                                                                          \
+        cwasm_log("read    elem segment type\n");                              \
         uint64_t max = proto_bug_read_varuint(reader, "element::init_size");   \
+        cwasm_log("read    elem seg func idx count: %lu\n", max);              \
         self->init = malloc(max * sizeof *self->init);                         \
         self->init_cap = self->init_end = self->init + max;                    \
-        for (uint64_t i = 0; i < max; i++)                                     \
-            self->init[i] = proto_bug_read_varuint(reader, "element::init");   \
+        for (uint64_t *i = self->init; i < self->init_end; i++)                \
+        {                                                                      \
+            *i = proto_bug_read_varuint(reader, "element::init");              \
+            cwasm_log("read    elem seg func idx: %lu\n", *i);                 \
+        }                                                                      \
     } while (0);
 
 #define table_index                                                            \
@@ -168,7 +182,7 @@ void cwasm_section_element_read(struct cwasm_section_element *self,
 
 #undef expression
 #undef expression_vector
-#undef initialization
+#undef funcidx_vector
 #undef table_index
 #undef reference_type
 #undef element_kind

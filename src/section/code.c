@@ -361,8 +361,6 @@ void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
 {
     uint64_t depth = 1;
 
-    cwasm_log("read    begin expr\n");
-
     while (1)
     {
         cwasm_vector_grow(struct cwasm_instruction, out->instructions);
@@ -413,6 +411,7 @@ void cwasm_section_code_free(struct cwasm_section_code *self)
 void cwasm_section_code_write(struct cwasm_section_code *self,
                               struct proto_bug *writer)
 {
+    cwasm_log("write   begin function body\n");
     static uint8_t code_data[1024 * 1024 * 16];
     struct proto_bug code_writer;
     proto_bug_init(&code_writer, code_data);
@@ -429,10 +428,10 @@ void cwasm_section_code_write(struct cwasm_section_code *self,
 
     proto_bug_write_varuint(&code_writer, local_amount,
                             "code::local::element_size");
+    cwasm_log("write   local decl count: %lu\n", local_amount);
 
     local_amount = 0;
     local_type = 0;
-
     // write locals
     for (uint8_t *i = self->locals; i < self->locals_end; i++)
     {
@@ -445,9 +444,14 @@ void cwasm_section_code_write(struct cwasm_section_code *self,
                                     "code::local::amount");
             proto_bug_write_uint8(&code_writer, local_type,
                                   "code::local::type");
+
+            cwasm_log("write   local decl: count: %lu, type: %u\n", local_amount,
+                      local_type);
             local_amount = 0;
         }
     }
+
+    cwasm_instruction_expression_write(&self->expression, writer);
 
     uint64_t byte_count = proto_bug_get_size(&code_writer);
     proto_bug_write_varuint(writer, byte_count, "code::instructions::size");
@@ -458,14 +462,21 @@ void cwasm_section_code_write(struct cwasm_section_code *self,
 void cwasm_section_code_read(struct cwasm_section_code *self,
                              struct proto_bug *reader)
 {
+    cwasm_log("read    begin function body\n");
+    uint8_t *end = reader->current +
+                   proto_bug_read_varuint(reader, "code::instructions::size");
     uint64_t local_element_count =
         proto_bug_read_varuint(reader, "code::local::element_size");
+
+    cwasm_log("read    local decl count: %lu\n", local_element_count);
 
     for (uint64_t i = 0; i < local_element_count; i++)
     {
         uint64_t amount_of_type =
             proto_bug_read_varuint(reader, "code::local::amount");
         uint8_t type = proto_bug_read_uint8(reader, "code::local::type");
+        cwasm_log("read    local decl: count: %lu, type: %u\n", amount_of_type,
+                  type);
         for (uint64_t j = 0; j < amount_of_type; j++)
         {
             cwasm_vector_grow(uint8_t, self->locals);

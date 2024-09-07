@@ -18,6 +18,9 @@ CMakeCache.txt
 
 
 sample.cwasm.txt
+sample.cwasm.read.txt
+sample.cwasm.write.txt
 sample.wasm.txt
+sample.mod.wasm
 sample.wasm
 out/*
