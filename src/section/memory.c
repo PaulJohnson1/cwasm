@@ -8,17 +8,17 @@
 void cwasm_section_memory_free(struct cwasm_section_memory *self) {}
 
 void cwasm_section_memory_write(struct cwasm_section_memory *self,
-                                struct proto_bug *writer)
+                                struct proto_bug *pb)
 {
-    cwasm_type_limit_write(&self->limit, writer);
-    cwasm_log("write   memory min: %lu, max: %lu\n", self->limit.min,
-              self->limit.max);
+    cwasm_type_limit_write(&self->limit, pb);
+    cwasm_log("write @%08lx  memory min: %lu, max: %lu\n",
+              proto_bug_get_size(pb), self->limit.min, self->limit.max);
 }
 
 void cwasm_section_memory_read(struct cwasm_section_memory *self,
-                               struct proto_bug *reader)
+                               struct proto_bug *pb)
 {
-    cwasm_type_limit_read(&self->limit, reader);
-    cwasm_log("read    memory min: %lu, max: %lu\n", self->limit.min,
-              self->limit.max);
+    cwasm_type_limit_read(&self->limit, pb);
+    cwasm_log("read @%08lx   memory min: %lu, max: %lu\n",
+              proto_bug_get_size(pb), self->limit.min, self->limit.max);
 }

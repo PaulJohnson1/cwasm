@@ -13,6 +13,6 @@ struct cwasm_section_table
 
 extern void cwasm_section_table_free(struct cwasm_section_table *);
 extern void cwasm_section_table_write(struct cwasm_section_table *,
-                                     struct proto_bug *);
+                                      struct proto_bug *);
 extern void cwasm_section_table_read(struct cwasm_section_table *,
-                                    struct proto_bug *);
+                                     struct proto_bug *);

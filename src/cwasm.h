@@ -35,8 +35,8 @@ CWASM_EXPORT extern void cwasm_module_write(struct cwasm_module *self,
 #define x(section)                                                             \
     CWASM_EXPORT extern struct cwasm_section_##section                         \
         *cwasm_module_get_##section##s(struct cwasm_module *);                 \
-    CWASM_EXPORT extern uint64_t cwasm_##section##_get_byte_size();             \
-    CWASM_EXPORT extern uint64_t cwasm_module_get_##section##_size(                \
+    CWASM_EXPORT extern uint64_t cwasm_##section##_get_byte_size();            \
+    CWASM_EXPORT extern uint64_t cwasm_module_get_##section##_size(            \
         struct cwasm_module *);                                                \
     CWASM_EXPORT extern void cwasm_module_grow_##section(struct cwasm_module *);
 cwasm_sections(x);

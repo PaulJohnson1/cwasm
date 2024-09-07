@@ -77,8 +77,8 @@ struct cwasm_module read_module_from_file(char const *name)
     uint8_t *data;
     uint64_t size;
     read_bytes_from_file(name, &data, &size);
-    struct proto_bug reader;
-    proto_bug_init(&reader, data);
+    struct proto_bug pb;
+    proto_bug_init(&pb, data);
     struct cwasm_module readed_module;
     cwasm_module_init(&readed_module);
     cwasm_module_read(&readed_module, data, size);

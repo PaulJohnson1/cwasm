@@ -19,6 +19,6 @@ struct cwasm_section_element
 
 extern void cwasm_section_element_free(struct cwasm_section_element *);
 extern void cwasm_section_element_write(struct cwasm_section_element *,
-                                       struct proto_bug *);
+                                        struct proto_bug *);
 extern void cwasm_section_element_read(struct cwasm_section_element *,
-                                      struct proto_bug *);
+                                       struct proto_bug *);

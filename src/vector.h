@@ -15,4 +15,3 @@
         name##_end = new_data + capacity;                                      \
         name##_cap = new_data_cap;                                             \
     }
-    

@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-#include <util.h>
 #include <type.h>
+#include <util.h>
 
 struct proto_bug;
 

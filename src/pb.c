@@ -19,7 +19,7 @@ extern "C"
 #endif
 #define ENCODING_TYPES                                                         \
     XX(uint8)                                                                  \
-    XX(int8)                                                                  \
+    XX(int8)                                                                   \
     XX(uint16)                                                                 \
     XX(uint32)                                                                 \
     XX(uint64)                                                                 \

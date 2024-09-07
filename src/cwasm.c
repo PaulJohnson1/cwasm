@@ -96,38 +96,36 @@ cwasm_sections(x)
     {                                                                          \
         if (self->name##s != self->name##s_end)                                \
         {                                                                      \
-            proto_bug_write_uint8(&pb, cwasm_const_section_##name,         \
+            proto_bug_write_uint8(&pb, cwasm_const_section_##name,             \
                                   "section id");                               \
             cwasm_log("write @%08lx  begin section id: %d\n",                  \
-                      proto_bug_get_size(&pb),                             \
-                      cwasm_const_section_##name);                             \
-            /* must use a separate pb for the section since we must be     \
+                      proto_bug_get_size(&pb), cwasm_const_section_##name);    \
+            /* must use a separate pb for the section since we must be         \
              * able to get the size and put it before the section data */      \
-            struct proto_bug section_pb;                                   \
-            proto_bug_init(&section_pb, section_data);                     \
-            proto_bug_write_varuint(&section_pb,                           \
+            struct proto_bug section_pb;                                       \
+            proto_bug_init(&section_pb, section_data);                         \
+            proto_bug_write_varuint(&section_pb,                               \
                                     self->name##s_end - self->name##s,         \
                                     "element count");                          \
             cwasm_log("write @%08lx  element count: %" PRIuPTR "\n",           \
-                      proto_bug_get_size(&pb) +                            \
-                          proto_bug_get_size(&section_pb),                 \
+                      proto_bug_get_size(&pb) +                                \
+                          proto_bug_get_size(&section_pb),                     \
                       self->name##s_end - self->name##s);                      \
                                                                                \
             for (struct cwasm_section_##name *i = self->name##s;               \
                  i < self->name##s_end; i++)                                   \
-                cwasm_section_##name##_write(i, &section_pb);              \
+                cwasm_section_##name##_write(i, &section_pb);                  \
                                                                                \
-            /* copy section pb over to module pb */                    \
-            uint64_t byte_count = proto_bug_get_size(&section_pb);         \
-            cwasm_log("write @%08lx  end   section id: %d\tsize: %" PRIu64     \
-                      "\n",                                                    \
-                      proto_bug_get_size(&pb) +                            \
-                          proto_bug_get_size(&section_pb),                 \
-                      cwasm_const_section_##name, byte_count);                 \
-            proto_bug_write_varuint(&pb, byte_count, "section data size"); \
+            /* copy section pb over to module pb */                            \
+            uint64_t byte_count = proto_bug_get_size(&section_pb);             \
+            cwasm_log(                                                         \
+                "write @%08lx  end   section id: %d\tsize: %" PRIu64 "\n",     \
+                proto_bug_get_size(&pb) + proto_bug_get_size(&section_pb),     \
+                cwasm_const_section_##name, byte_count);                       \
+            proto_bug_write_varuint(&pb, byte_count, "section data size");     \
             /* want 1:1 copy instead of any debug headers*/                    \
-            proto_bug_write_string_internal(                                   \
-                &pb, (char *)section_pb.start, byte_count);            \
+            proto_bug_write_string_internal(&pb, (char *)section_pb.start,     \
+                                            byte_count);                       \
         }                                                                      \
     } while (0)
 
@@ -198,15 +196,15 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
 #define read_section(name)                                                     \
     case cwasm_const_section_##name:                                           \
     {                                                                          \
-        uint64_t element_count =                                               \
-            proto_bug_read_varuint(&pb, "element count");                  \
-        cwasm_log("read    element count: %" PRIu64 "u\n", element_count);     \
+        uint64_t element_count = proto_bug_read_varuint(&pb, "element count"); \
+        cwasm_log("read @%08lx   element count: %" PRIu64 "u\n",               \
+                  proto_bug_get_size(&pb), element_count);                     \
         self->name##s = malloc(element_count * sizeof *self->name##s);         \
         memset(self->name##s, 0, element_count * sizeof *self->name##s);       \
         self->name##s_end = self->name##s_cap = self->name##s + element_count; \
         for (struct cwasm_section_##name *i = self->name##s;                   \
              i < self->name##s_end; i++)                                       \
-            cwasm_section_##name##_read(i, &pb);                           \
+            cwasm_section_##name##_read(i, &pb);                               \
         break;                                                                 \
     }
             read_section(type);
@@ -227,7 +225,8 @@ void cwasm_module_read(struct cwasm_module *self, uint8_t *begin, uint64_t size)
         }
         assert(expected_end == pb.current);
 
-        cwasm_log("read  end   section id: %d\n", section_id);
+        cwasm_log("read @%08lx end   section id: %d\n", proto_bug_get_size(&pb),
+                  section_id);
     }
-    cwasm_log("read  end module\n");
+    cwasm_log("read @%08lx end module\n", proto_bug_get_size(&pb));
 }

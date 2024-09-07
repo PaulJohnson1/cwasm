@@ -1,14 +1,14 @@
 #include <section/type.h>
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
-#include <inttypes.h>
 
 #include <pb.h>
 
-#include <log.h>
 #include <consts.h>
+#include <log.h>
 
 void cwasm_section_type_free(struct cwasm_section_type *self)
 {
@@ -26,42 +26,45 @@ int8_t *cwasm_section_type_get_results(struct cwasm_section_type *self)
 }
 
 void cwasm_section_type_write(struct cwasm_section_type *self,
-                              struct proto_bug *writer)
+                              struct proto_bug *pb)
 {
-    proto_bug_write_uint8(writer, 0x60, "mystery byte");
+    proto_bug_write_uint8(pb, 0x60, "mystery byte");
     if (!self->signature)
     {
-        proto_bug_write_varuint(writer, 0, "parameters size");
-        proto_bug_write_varuint(writer, 0, "results size");
+        proto_bug_write_varuint(pb, 0, "parameters size");
+        proto_bug_write_varuint(pb, 0, "results size");
     }
 
-    proto_bug_write_varuint(writer, self->parameters_size, "parameters size");
-    proto_bug_write_string(writer, (char *)cwasm_section_type_get_parameters(self),
+    proto_bug_write_varuint(pb, self->parameters_size, "parameters size");
+    proto_bug_write_string(pb, (char *)cwasm_section_type_get_parameters(self),
                            self->parameters_size, "parameters");
-    proto_bug_write_varuint(writer, self->results_size, "results size");
-    proto_bug_write_string(writer, (char *)cwasm_section_type_get_results(self),
+    proto_bug_write_varuint(pb, self->results_size, "results size");
+    proto_bug_write_string(pb, (char *)cwasm_section_type_get_results(self),
                            self->results_size, "results");
-    cwasm_log("write   type seg: param_size: %" PRIu64 "\t results_size: %" PRIu64 "\n",
-              self->parameters_size, self->results_size);
+    cwasm_log("write @%08lx  type seg: param_size: %" PRIu64
+              "\t results_size: %" PRIu64 "\n",
+              proto_bug_get_size(pb), self->parameters_size,
+              self->results_size);
 }
 
-
 void cwasm_section_type_read(struct cwasm_section_type *self,
-                             struct proto_bug *reader)
+                             struct proto_bug *pb)
 {
-    if (proto_bug_read_uint8(reader, "mystery byte") != 0x60)
+    if (proto_bug_read_uint8(pb, "mystery byte") != 0x60)
         assert(0);
 
-    self->parameters_size = proto_bug_read_varuint(reader, "parameters size");
+    self->parameters_size = proto_bug_read_varuint(pb, "parameters size");
     int8_t *parameters_temp = alloca(self->parameters_size);
-    proto_bug_read_string(reader, (char *)parameters_temp, self->parameters_size,
+    proto_bug_read_string(pb, (char *)parameters_temp, self->parameters_size,
                           "parameters");
-    self->results_size = proto_bug_read_varuint(reader, "results size");
+    self->results_size = proto_bug_read_varuint(pb, "results size");
     self->signature = malloc(self->results_size + self->parameters_size);
     memcpy(cwasm_section_type_get_parameters(self), parameters_temp,
            self->parameters_size);
-    proto_bug_read_string(reader, (char *)cwasm_section_type_get_results(self),
+    proto_bug_read_string(pb, (char *)cwasm_section_type_get_results(self),
                           self->results_size, "results");
-    cwasm_log("read    type seg: param_size: %" PRIu64 "\t results_size: %" PRIu64 "\n",
-              self->parameters_size, self->results_size);
+    cwasm_log("read @%08lx   type seg: param_size: %" PRIu64
+              "\t results_size: %" PRIu64 "\n",
+              proto_bug_get_size(pb), self->parameters_size,
+              self->results_size);
 }
