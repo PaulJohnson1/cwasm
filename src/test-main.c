@@ -98,7 +98,7 @@ void save_module_to_file(struct cwasm_module *module, char const *name)
     fclose(outwasm);
 }
 
-void test_create_module()
+struct cwasm_module test_create_module()
 {
     struct cwasm_module module;
     cwasm_module_init(&module);
@@ -134,8 +134,8 @@ void test_create_module()
                      create_instruction(cwasm_opcode_call, 1, 0),
                      create_instruction(cwasm_opcode_end, 0));
 
-    // module.exports_end->name = strdup("lolol");
-    // module.exports_end->type = 1;
+    module.exports_end->name = strdup("lolol");
+    module.exports_end->type = 1;
 
     module.imports_end++;
     module.types_end++;
@@ -143,7 +143,7 @@ void test_create_module()
     module.codes_end++;
     module.exports_end++;
 
-    cwasm_module_free(&module);
+    return module;
 }
 
 void test_read_write_sample()
@@ -175,35 +175,20 @@ void test_find_first_diff()
     }
 }
 
+void test_read_write_pb()
+{
+    struct cwasm_module module = test_create_module();
+    save_module_to_file(&module, "sample.mod.wasm");
+    struct cwasm_module module2 = read_module_from_file("sample.mod.wasm");
+
+    cwasm_module_free(&module);
+    cwasm_module_free(&module2);
+}
+
 CWASM_EXPORT
 int main()
 {
-    // test_create_module();
-
-    // static uint8_t data[1024 * 1024];
-    // uint64_t size;
-    // int err = cwasm_module_write(&module, data, &size);
-    // assert(!err);
-    // log_hex(data, data + size);
-
+    // test_read_write_pb();
     test_read_write_sample();
     test_find_first_diff();
-
-    return 0;
-
-    // FILE *file = fopen("sample.wasm", "rb");
-    // fseek(file, 0, SEEK_END);
-    // uint64_t file_length = ftell(file);
-    // uint8_t *data = malloc(file_length * 2);
-    // rewind(file);
-    // (void)fread(data, file_length, 1, file);
-    // cwasm_module_read(&module, data, file_length);
-    // static uint8_t
-    //     new_data[100000000]; // really large for when you do protobug builds
-    // uint64_t new_size;
-    // cwasm_module_write(&module, new_data, &new_size);
-    // cwasm_module_free(&module);
-
-    // fclose(file);
-    // free(data);
 }

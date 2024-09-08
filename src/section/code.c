@@ -449,12 +449,12 @@ void cwasm_section_code_write(struct cwasm_section_code *self,
             proto_bug_write_uint8(&code_pb, local_type, "code::local::type");
 
             cwasm_log("write @%08lx   local decl: count: %lu, type: %u\n",
-                      proto_bug_get_size(pb), local_amount, local_type);
+                      proto_bug_get_size(&code_pb), local_amount, local_type);
             local_amount = 0;
         }
     }
 
-    cwasm_instruction_expression_write(&self->expression, pb);
+    cwasm_instruction_expression_write(&self->expression, &code_pb);
 
     uint64_t byte_count = proto_bug_get_size(&code_pb);
     proto_bug_write_varuint(pb, byte_count, "code::instructions::size");

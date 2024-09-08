@@ -267,7 +267,6 @@ extern "C"
             string[i] = proto_bug_read_uint8_internal(self);
     }
 
-#ifndef PROTO_BUG_NDEBUG
     static char assertion_fail_message[1024];
 
     void proto_bug_assert_valid_debug_header(
@@ -474,7 +473,6 @@ extern "C"
         proto_bug_assert_valid_debug_header(self, string, name, file, line);
         proto_bug_read_string_internal(self, string_pointer, size);
     }
-#endif
 
 #ifdef __cplusplus
 }
