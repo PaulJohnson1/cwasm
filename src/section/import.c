@@ -30,7 +30,7 @@ void cwasm_section_import_write(struct cwasm_section_import *self,
     proto_bug_write_uint8(pb, self->type, "description::type");
 
     cwasm_log("write @%08lx  import seg: \"%s\"::\"%s\"\n",
-              proto_bug_get_size(pb), self->module, self->name);
+              proto_bug_get_total_size(pb), self->module, self->name);
 
     switch (self->type)
     {
@@ -38,7 +38,7 @@ void cwasm_section_import_write(struct cwasm_section_import *self,
         proto_bug_write_varuint(pb, self->table_index,
                                 "description::table_index");
         cwasm_log("write @%08lx  description: 0: table_index: %" PRIu64 "\n",
-                  proto_bug_get_size(pb), self->table_index);
+                  proto_bug_get_total_size(pb), self->table_index);
         break;
     case 1:
         cwasm_type_table_write(&self->table, pb);
@@ -68,7 +68,7 @@ void cwasm_section_import_read(struct cwasm_section_import *self,
     self->type = proto_bug_read_uint8(pb, "description::type");
 
     cwasm_log("read @%08lx   import seg: \"%s\"::\"%s\"\n",
-              proto_bug_get_size(pb), self->module, self->name);
+              proto_bug_get_total_size(pb), self->module, self->name);
 
     switch (self->type)
     {
@@ -76,7 +76,7 @@ void cwasm_section_import_read(struct cwasm_section_import *self,
         self->table_index =
             proto_bug_read_varuint(pb, "description::table_index");
         cwasm_log("read @%08lx   description: 0: table_index: %" PRIu64 "\n",
-                  proto_bug_get_size(pb), self->table_index);
+                  proto_bug_get_total_size(pb), self->table_index);
         break;
     case 1:
         cwasm_type_table_read(&self->table, pb);

@@ -21,13 +21,15 @@ extern "C"
 
     struct proto_bug
     {
+        uint64_t offset;
         uint8_t *start;
         uint8_t *current;
     };
 
     void proto_bug_init(struct proto_bug *, uint8_t *);
-    void proto_bug_reset(struct proto_bug *); // go back to the beginning
+    void proto_bug_reset(struct proto_bug *);
     uint64_t proto_bug_get_size(struct proto_bug *);
+    uint64_t proto_bug_get_total_size(struct proto_bug *);
 
     void proto_bug_write_uint8_internal(struct proto_bug *, uint8_t);
     void proto_bug_write_uint16_internal(struct proto_bug *, uint16_t);

@@ -23,7 +23,7 @@ void cwasm_section_table_write(struct cwasm_section_table *self,
         proto_bug_write_varuint(pb, self->max, "table::max");
 
     cwasm_log("write @%08lx  type: %lu, min: %lu, max: %lu\n",
-              proto_bug_get_size(pb), self->type, self->min, self->max);
+              proto_bug_get_total_size(pb), self->type, self->min, self->max);
 }
 
 void cwasm_section_table_read(struct cwasm_section_table *self,
@@ -36,5 +36,5 @@ void cwasm_section_table_read(struct cwasm_section_table *self,
         flags & 1 ? proto_bug_read_varuint(pb, "table::max") : UINT64_MAX;
 
     cwasm_log("read @%08lx   type: %lu, min: %lu, max: %lu\n",
-              proto_bug_get_size(pb), self->type, self->min, self->max);
+              proto_bug_get_total_size(pb), self->type, self->min, self->max);
 }

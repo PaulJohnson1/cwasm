@@ -25,10 +25,10 @@ void cwasm_section_export_write(struct cwasm_section_export *self,
     proto_bug_write_varuint(pb, self->index, "export::index");
 
     // cwasm_log("write @%08lx  description: type: %u\n",
-    // proto_bug_get_size(pb),self->type);
+    // proto_bug_get_total_size(pb),self->type);
     cwasm_log(
         "write @%08lx  export seg end: type %u, index: %lu, name: \"%s\"\n",
-        proto_bug_get_size(pb), self->type, self->index, self->name);
+        proto_bug_get_total_size(pb), self->type, self->index, self->name);
 }
 
 void cwasm_section_export_read(struct cwasm_section_export *self,
@@ -42,8 +42,8 @@ void cwasm_section_export_read(struct cwasm_section_export *self,
     self->index = proto_bug_read_varuint(pb, "export::index");
 
     // cwasm_log("read @%08lx   description: type: %u\n",
-    // proto_bug_get_size(pb),self->type);
+    // proto_bug_get_total_size(pb),self->type);
     cwasm_log(
         "read @%08lx   export seg end: type %u, index: %lu, name: \"%s\"\n",
-        proto_bug_get_size(pb), self->type, self->index, self->name);
+        proto_bug_get_total_size(pb), self->type, self->index, self->name);
 }

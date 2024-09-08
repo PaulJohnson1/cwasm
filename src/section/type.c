@@ -43,7 +43,7 @@ void cwasm_section_type_write(struct cwasm_section_type *self,
                            self->results_size, "results");
     cwasm_log("write @%08lx  type seg: param_size: %" PRIu64
               "\t results_size: %" PRIu64 "\n",
-              proto_bug_get_size(pb), self->parameters_size,
+              proto_bug_get_total_size(pb), self->parameters_size,
               self->results_size);
 }
 
@@ -65,6 +65,6 @@ void cwasm_section_type_read(struct cwasm_section_type *self,
                           self->results_size, "results");
     cwasm_log("read @%08lx   type seg: param_size: %" PRIu64
               "\t results_size: %" PRIu64 "\n",
-              proto_bug_get_size(pb), self->parameters_size,
+              proto_bug_get_total_size(pb), self->parameters_size,
               self->results_size);
 }

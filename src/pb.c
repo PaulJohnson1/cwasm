@@ -54,6 +54,7 @@ extern "C"
 
     void proto_bug_init(struct proto_bug *self, uint8_t *data)
     {
+        self->offset = 0;
         self->start = data;
         self->current = data;
     }
@@ -66,6 +67,11 @@ extern "C"
     uint64_t proto_bug_get_size(struct proto_bug *self)
     {
         return self->current - self->start;
+    }
+
+    uint64_t proto_bug_get_total_size(struct proto_bug *self)
+    {
+        return self->offset + proto_bug_get_size(self);
     }
 
     void proto_bug_write_uint8_internal(struct proto_bug *self, uint8_t data)
