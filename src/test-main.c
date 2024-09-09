@@ -19,7 +19,7 @@
 void log_hex(uint8_t *start, uint8_t *end)
 {
     while (start != end)
-        printf("%d,", *start++);
+        printf("%02x,", *start++);
     puts("");
 }
 
@@ -61,6 +61,7 @@ void set_instructions(struct cwasm_section_code *code, uint64_t count, ...)
 void read_bytes_from_file(char const *name, uint8_t **data, uint64_t *size)
 {
     FILE *file = fopen(name, "rb");
+    assert(file);
     fseek(file, 0, SEEK_END);
     *size = ftell(file);
     fseek(file, 0, SEEK_SET);
@@ -120,22 +121,28 @@ struct cwasm_module test_create_module()
 
     module.functions_end->type_index = 0;
 
-    module.codes_end->locals = malloc(1);
+    module.codes_end->locals = malloc(4);
     module.codes_end->locals_end = module.codes_end->locals_cap =
-        module.codes_end->locals + 1;
+        module.codes_end->locals + 4;
     module.codes_end->locals[0] = 127;
+    module.codes_end->locals[1] = 127;
+    module.codes_end->locals[2] = 126;
+    module.codes_end->locals[3] = 126;
     module.codes_end->expression.instructions = 0;
     module.codes_end->expression.instructions_end = 0;
     module.codes_end->expression.instructions_cap = 0;
-    set_instructions(module.codes_end, 5,
+    set_instructions(module.codes_end, 7,
                      create_instruction(cwasm_opcode_i32_const, 1, 123),
-                     create_instruction(cwasm_opcode_i32_const, 1, 1234),
+                     create_instruction(cwasm_opcode_i32_const, 1, 12),
+                     create_instruction(cwasm_opcode_i64_const, 1, 60),
+                     create_instruction(cwasm_opcode_drop, 0),
                      create_instruction(cwasm_opcode_i32_add, 0),
                      create_instruction(cwasm_opcode_call, 1, 0),
                      create_instruction(cwasm_opcode_end, 0));
 
     module.exports_end->name = strdup("lolol");
-    module.exports_end->type = 1;
+    module.exports_end->index = 1;
+    module.exports_end->type = 0;
 
     module.imports_end++;
     module.types_end++;
@@ -146,49 +153,95 @@ struct cwasm_module test_create_module()
     return module;
 }
 
-void test_read_write_sample()
-{
-    struct cwasm_module module = read_module_from_file("sample.wasm");
-    save_module_to_file(&module, "sample.mod.wasm");
-    cwasm_module_free(&module);
-}
-
-void test_find_first_diff()
+void test_find_first_diff(char const *a, char const *b)
 {
     uint8_t *original_data;
     uint64_t original_size;
     uint8_t *mod_data;
     uint64_t mod_size;
 
-    read_bytes_from_file("sample.wasm", &original_data, &original_size);
-    read_bytes_from_file("sample.mod.wasm", &mod_data, &mod_size);
+    read_bytes_from_file(a, &original_data, &original_size);
+    read_bytes_from_file(b, &mod_data, &mod_size);
 
     uint64_t min_size = original_size < mod_size ? original_size : mod_size;
 
-    for (uint64_t i = 0; i < mod_size; i++)
-    {
+    for (uint64_t i = 0; i < min_size; i++)
         if (original_data[i] != mod_data[i])
         {
             fprintf(stderr, "diff at %08lx\n", i);
             exit(1);
         }
-    }
+
+    if (min_size != original_size)
+        fputs("size is not the same\n", stderr);
+}
+
+void test_read_write_sample()
+{
+    struct cwasm_module module = read_module_from_file("sample.wasm");
+    // printf("%lld\n",
+    //        module.codes[6].expression.instructions[1].immediates[0].int64);
+    save_module_to_file(&module, "sample.mod.wasm");
+    cwasm_module_free(&module);
+
+    test_find_first_diff("sample.wasm", "sample.mod.wasm");
+
+    // struct cwasm_module module2 = read_module_from_file("sample.mod.wasm");
+    // cwasm_module_free(&module2);
 }
 
 void test_read_write_pb()
 {
     struct cwasm_module module = test_create_module();
-    save_module_to_file(&module, "sample.mod.wasm");
-    struct cwasm_module module2 = read_module_from_file("sample.mod.wasm");
+    save_module_to_file(&module, "1.wasm");
+    struct cwasm_module module2 = read_module_from_file("1.wasm");
+    save_module_to_file(&module2, "2.wasm");
+
+    test_find_first_diff("1.wasm", "2.wasm");
 
     cwasm_module_free(&module);
     cwasm_module_free(&module2);
+}
+
+uint64_t rand_uint64()
+{
+    uint64_t r = 0;
+    for (int i = 0; i < 64; i += 15 /*30*/)
+        r = r * ((uint64_t)RAND_MAX + 1) + rand();
+    return r;
+}
+
+void test_i64_pb()
+{
+    uint8_t pb_data[1000] = {0};
+    struct proto_bug pb;
+    proto_bug_init(&pb, pb_data);
+
+    for (uint64_t i = 0; i < 1000 * 1000 * 100; i++)
+    {
+        // int64_t test = -903075326004949130ll;
+        int64_t test = rand_uint64();
+        proto_bug_write_varint64(&pb, test, "test");
+        proto_bug_reset(&pb);
+        int64_t out = proto_bug_read_varint64(&pb, "test");
+        if (out != test)
+        {
+            proto_bug_reset(&pb);
+            proto_bug_read_varint64(&pb, "test");
+            printf("%ld %ld\n""f6,9e,b8,a0,e9,b8,e8,bb,73\n", test, out);
+            log_hex(pb_data, pb_data + proto_bug_get_size(&pb));
+            exit(1);
+        }
+        proto_bug_reset(&pb);
+        memset(pb_data, 0, proto_bug_get_size(&pb));
+    }
 }
 
 CWASM_EXPORT
 int main()
 {
     // test_read_write_pb();
-    test_read_write_sample();
-    test_find_first_diff();
+    // test_read_write_sample();
+    // test_find_first_diff();
+    test_i64_pb();
 }
