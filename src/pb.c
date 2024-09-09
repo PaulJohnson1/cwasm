@@ -144,7 +144,7 @@ extern "C"
     {
         while (1)
         {
-            int32_t byte = data & 0x7fll;
+            int64_t byte = data & 0x7fll;
             data >>= 7ll;
 
             if ((data == -1ll && (byte & 0x40ll)) ||
@@ -255,12 +255,12 @@ extern "C"
         while (1)
         {
             int64_t byte = proto_bug_read_uint8_internal(self);
-            x |= (byte & 127ll) << shift;
+            x |= (byte & 0x7fll) << shift;
             shift += 7ll;
 
-            if ((byte & 128ll) == 0ll)
+            if ((byte & 0x80ll) == 0ll)
             {
-                if (shift < 32ll && (byte & 40ll) != 0ll)
+                if (shift < 64ll && (byte & 0x40ll) != 0ll)
                     return x | (~0ll << shift);
                 return x;
             }
