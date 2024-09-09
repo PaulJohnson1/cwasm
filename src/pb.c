@@ -236,17 +236,16 @@ extern "C"
         while (1)
         {
             int32_t byte = proto_bug_read_uint8_internal(self);
-            x |= (byte & 127) << shift;
+            x |= (byte & 0x7f) << shift;
             shift += 7;
 
-            if ((byte & 128) == 0)
-                break;
+            if ((byte & 0x80) == 0)
+            {
+                if (shift < 32 && (byte & 0x40) != 0)
+                    return x | (~0 << shift);
+                return x;
+            }
         }
-
-        if (shift >= 32)
-            return x;
-        int32_t ashift = 32 - shift;
-        return (x << ashift) >> ashift;
     }
     int64_t proto_bug_read_varint64_internal(struct proto_bug *self)
     {

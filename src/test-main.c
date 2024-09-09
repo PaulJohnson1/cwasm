@@ -172,22 +172,20 @@ void test_find_first_diff(char const *a, char const *b)
             exit(1);
         }
 
-    if (min_size != original_size)
+    if (mod_size != original_size)
         fputs("size is not the same\n", stderr);
+
+    puts("they are the same");
 }
 
 void test_read_write_sample()
 {
-    struct cwasm_module module = read_module_from_file("sample.wasm");
-    // printf("%lld\n",
-    //        module.codes[6].expression.instructions[1].immediates[0].int64);
+    struct cwasm_module module = read_module_from_file("sample.wasm");    //        module.codes[6].expression.instructions[1].immediates[0].int64);
     save_module_to_file(&module, "sample.mod.wasm");
     cwasm_module_free(&module);
 
-    test_find_first_diff("sample.wasm", "sample.mod.wasm");
-
-    // struct cwasm_module module2 = read_module_from_file("sample.mod.wasm");
-    // cwasm_module_free(&module2);
+    struct cwasm_module module2 = read_module_from_file("sample.mod.wasm");
+    cwasm_module_free(&module2);
 }
 
 void test_read_write_pb()
@@ -241,7 +239,7 @@ CWASM_EXPORT
 int main()
 {
     // test_read_write_pb();
-    // test_read_write_sample();
-    // test_find_first_diff();
-    test_i64_pb();
+    test_read_write_sample();
+    test_find_first_diff("sample.wasm", "sample.mod.wasm");
+    // test_i64_pb();
 }

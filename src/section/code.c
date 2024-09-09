@@ -253,10 +253,10 @@ void cwasm_instruction_write(struct cwasm_instruction *self,
 #undef Y
         case cwasm_opcode_br_table:
     {
-        uint64_t immediates_count = self->immediates_end - self->immediates - 1;
-        proto_bug_write_varuint(pb, immediates_count, "immediate_br_table");
+        uint64_t immediates_count = self->immediates_end - self->immediates;
+        proto_bug_write_varuint(pb, immediates_count - 1, "immediate_br_table");
         for (uint64_t i = 0; i < immediates_count; i++)
-            proto_bug_write_varuint(pb, self->immediates[i + 1].uint64,
+            proto_bug_write_varuint(pb, self->immediates[i].uint64,
                                     "immediate");
         break;
     }

@@ -37,6 +37,9 @@ void cwasm_section_data_write(struct cwasm_section_data *self,
                               struct proto_bug *pb)
 {
 #define initialization                                                         \
+    proto_bug_write_varuint(pb,                                                \
+                            self->initialization_end - self->initialization,   \
+                            "data::init_size");                                \
     for (uint8_t *i = self->initialization; i < self->initialization_end; i++) \
         proto_bug_write_uint8(pb, *i, "data::init");                           \
     cwasm_log("write @%08lx  data seg init size: %" PRIuPTR "\n",              \
