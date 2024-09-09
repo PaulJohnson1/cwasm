@@ -2,7 +2,8 @@
 
 #include <stdint.h>
 
-#include <vector.h>
+#include <cwasm/util.h>
+#include <cwasm/vector.h>
 
 struct proto_bug;
 
@@ -46,6 +47,14 @@ cwasm_instruction_expression_write(struct cwasm_instruction_expression *,
 extern void
 cwasm_instruction_expression_free(struct cwasm_instruction_expression *);
 
+CWASM_EXPORT extern void
+cwasm_section_code_grow_locals(struct cwasm_section_code *);
+CWASM_EXPORT extern uint8_t *
+cwasm_section_code_get_locals(struct cwasm_section_code *);
+CWASM_EXPORT extern uint8_t *
+cwasm_section_code_get_locals_end(struct cwasm_section_code *);
+CWASM_EXPORT extern uint8_t *
+cwasm_section_code_set_locals_end(struct cwasm_section_code *self, uint8_t *x);
 extern void cwasm_section_code_free(struct cwasm_section_code *);
 extern int cwasm_section_code_write(struct cwasm_section_code *,
                                     struct proto_bug *);

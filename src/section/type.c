@@ -1,11 +1,16 @@
-#include <section/type.h>
+#include <cwasm/section/type.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-#include <pb.h>
+#include <cwasm/pb.h>
 
+<<<<<<< Updated upstream
 #include <consts.h>
+=======
+#include <cwasm/consts.h>
+#include <cwasm/log.h>
+>>>>>>> Stashed changes
 
 void cwasm_section_type_free(struct cwasm_section_type *self)
 {

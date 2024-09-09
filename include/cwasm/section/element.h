@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-#include <section/code.h>
-#include <vector.h>
+#include <cwasm/section/code.h>
+#include <cwasm/vector.h>
 
 struct proto_bug;
 

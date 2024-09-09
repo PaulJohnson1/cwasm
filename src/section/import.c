@@ -1,12 +1,17 @@
-#include <section/import.h>
+#include <cwasm/section/import.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <pb.h>
+#include <cwasm/pb.h>
 
+<<<<<<< Updated upstream
 #include <consts.h>
+=======
+#include <cwasm/consts.h>
+#include <cwasm/log.h>
+>>>>>>> Stashed changes
 
 void cwasm_section_import_free(struct cwasm_section_import *self)
 {

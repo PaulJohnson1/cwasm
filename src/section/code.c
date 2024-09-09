@@ -1,4 +1,4 @@
-#include <section/code.h>
+#include <cwasm/section/code.h>
 
 #include <assert.h>
 #include <inttypes.h>
@@ -6,9 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <pb.h>
+#include <cwasm/pb.h>
 
+<<<<<<< Updated upstream
 #include <consts.h>
+=======
+#include <cwasm/consts.h>
+#include <cwasm/log.h>
+>>>>>>> Stashed changes
 
 // #define X(OP, IMMEDIATE_COUNT, ...)
 #define immediate_opcode_types                                                 \
@@ -472,4 +477,25 @@ int cwasm_section_code_read(struct cwasm_section_code *self,
     cwasm_instruction_expression_read(&self->expression, reader);
 
     return cwasm_error_ok;
+}
+
+void cwasm_section_code_grow_locals(struct cwasm_section_code *self)
+{
+    cwasm_vector_grow(uint8_t, self->locals);
+}
+
+uint8_t *cwasm_section_code_get_locals(struct cwasm_section_code *self)
+{
+    return self->locals;
+}
+
+uint8_t *cwasm_section_code_get_locals_end(struct cwasm_section_code *self)
+{
+    return self->locals_end;
+}
+
+uint8_t *cwasm_section_code_set_locals_end(struct cwasm_section_code *self,
+                                           uint8_t *x)
+{
+    return self->locals_end = x;
 }

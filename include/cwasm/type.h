@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include <consts.h>
+#include <cwasm/consts.h>
 
 struct proto_bug;
 

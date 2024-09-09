@@ -1,11 +1,11 @@
-#include <section/custom.h>
+#include <cwasm/section/custom.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-#include <pb.h>
+#include <cwasm/pb.h>
 
-#include <consts.h>
+#include <cwasm/consts.h>
 
 void cwasm_section_custom_free(struct cwasm_section_custom *self)
 {

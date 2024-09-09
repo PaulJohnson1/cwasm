@@ -1,8 +1,13 @@
-#include <section/function.h>
+#include <cwasm/section/function.h>
 
-#include <pb.h>
+#include <cwasm/pb.h>
 
+<<<<<<< Updated upstream
 #include <consts.h>
+=======
+#include <cwasm/consts.h>
+#include <cwasm/log.h>
+>>>>>>> Stashed changes
 
 void cwasm_section_function_free(struct cwasm_section_function *self) {}
 

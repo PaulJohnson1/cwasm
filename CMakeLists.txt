@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(cwasm)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
-
 set(SRCS
     src/section/code.c
     src/section/custom.c
@@ -20,11 +18,17 @@ set(SRCS
     src/pb.c
 )
 
-include_directories(src)
+include_directories(include)
 
+<<<<<<< Updated upstream
 if(TEST_BUILD)
     # todo: Paul
     # add tests
+=======
+if(WASM_BUILD)
+    set(CMAKE_C_COMPILER "emcc")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWASM_BUILD -sMODULARIZE=1 -sEXPORT_NAME=create_module -sTOTAL_MEMORY=1gb -sEXPORTED_FUNCTIONS=_main,_malloc,_free")
+>>>>>>> Stashed changes
 else()
     list(APPEND SRCS "src/test-main.c")
 endif()
@@ -35,4 +39,12 @@ else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -DPROTO_BUG_NDEBUG -march=native -utune=native")
 endif()
 
-add_executable(cwasm ${SRCS})
+add_library(cwasm ${SRCS})
+
+install(TARGETS cwasm
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+ 

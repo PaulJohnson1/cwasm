@@ -1,4 +1,4 @@
-#include "pb.h"
+#include <cwasm/pb.h>
 
 #include <assert.h>
 #include <inttypes.h>

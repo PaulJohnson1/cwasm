@@ -1,4 +1,4 @@
-#include <cwasm.h>
+#include <cwasm/cwasm.h>
 
 #include <assert.h>
 #include <inttypes.h>
@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+<<<<<<< Updated upstream
 #include <pb.h>
 
 #include <consts.h>
@@ -22,6 +23,26 @@
 #include <section/type.h>
 
 #define MAX_SECTION_SIZE (1024 * 1024 * 8)
+=======
+#include <cwasm/pb.h>
+
+#include <cwasm/consts.h>
+#include <cwasm/log.h>
+#include <cwasm/section/code.h>
+#include <cwasm/section/custom.h>
+#include <cwasm/section/data.h>
+#include <cwasm/section/data_count.h>
+#include <cwasm/section/element.h>
+#include <cwasm/section/export.h>
+#include <cwasm/section/function.h>
+#include <cwasm/section/global.h>
+#include <cwasm/section/import.h>
+#include <cwasm/section/memory.h>
+#include <cwasm/section/table.h>
+#include <cwasm/section/type.h>
+
+#define max_section_size (1024 * 1024 * 256)
+>>>>>>> Stashed changes
 
 void cwasm_module_init(struct cwasm_module *self)
 {

@@ -2,7 +2,13 @@
 
 #include <stdint.h>
 
+<<<<<<< Updated upstream:src/cwasm.h
 #include <vector.h>
+=======
+#include <cwasm/consts.h>
+#include <cwasm/util.h>
+#include <cwasm/vector.h>
+>>>>>>> Stashed changes:include/cwasm/cwasm.h
 
 // note: grammar not proper, memorys should be called memories but macros are
 // annoying

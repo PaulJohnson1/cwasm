@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <type.h>
+#include <cwasm/type.h>
 
 struct proto_bug;
 
