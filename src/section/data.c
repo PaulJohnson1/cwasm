@@ -5,14 +5,9 @@
 
 #include <cwasm/pb.h>
 
-<<<<<<< Updated upstream
-#include <consts.h>
-#include <section/code.h>
-=======
 #include <cwasm/consts.h>
 #include <cwasm/log.h>
 #include <cwasm/section/code.h>
->>>>>>> Stashed changes
 
 void cwasm_section_data_free(struct cwasm_section_data *self)
 {

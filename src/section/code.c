@@ -8,12 +8,8 @@
 
 #include <cwasm/pb.h>
 
-<<<<<<< Updated upstream
-#include <consts.h>
-=======
 #include <cwasm/consts.h>
 #include <cwasm/log.h>
->>>>>>> Stashed changes
 
 // #define X(OP, IMMEDIATE_COUNT, ...)
 #define immediate_opcode_types                                                 \

@@ -1,13 +1,8 @@
 #pragma once
 
-<<<<<<< Updated upstream:src/section/import.h
-#include <consts.h>
-#include <type.h>
-=======
 #include <cwasm/consts.h>
 #include <cwasm/type.h>
 #include <cwasm/util.h>
->>>>>>> Stashed changes:include/cwasm/section/import.h
 
 struct cwasm_section_import
 {

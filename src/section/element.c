@@ -5,14 +5,9 @@
 
 #include <cwasm/pb.h>
 
-<<<<<<< Updated upstream
-#include <consts.h>
-#include <section/code.h>
-=======
 #include <cwasm/consts.h>
 #include <cwasm/log.h>
 #include <cwasm/section/code.h>
->>>>>>> Stashed changes
 
 enum cwasm_element_segment_mode
 {

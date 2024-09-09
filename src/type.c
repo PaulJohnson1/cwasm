@@ -4,12 +4,8 @@
 
 #include <cwasm/pb.h>
 
-<<<<<<< Updated upstream
-#include <consts.h>
-=======
 #include <cwasm/consts.h>
 #include <cwasm/log.h>
->>>>>>> Stashed changes
 
 void cwasm_type_limit_write(struct cwasm_type_limit *self,
                             struct proto_bug *writer)

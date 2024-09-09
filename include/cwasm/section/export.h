@@ -2,12 +2,8 @@
 
 #include <stdint.h>
 
-<<<<<<< Updated upstream:src/section/export.h
-#include <type.h>
-=======
 #include <cwasm/type.h>
 #include <cwasm/util.h>
->>>>>>> Stashed changes:include/cwasm/section/export.h
 
 struct proto_bug;
 

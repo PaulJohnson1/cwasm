@@ -20,15 +20,9 @@ set(SRCS
 
 include_directories(include)
 
-<<<<<<< Updated upstream
-if(TEST_BUILD)
-    # todo: Paul
-    # add tests
-=======
 if(WASM_BUILD)
     set(CMAKE_C_COMPILER "emcc")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWASM_BUILD -sMODULARIZE=1 -sEXPORT_NAME=create_module -sTOTAL_MEMORY=1gb -sEXPORTED_FUNCTIONS=_main,_malloc,_free")
->>>>>>> Stashed changes
 else()
     list(APPEND SRCS "src/test-main.c")
 endif()
