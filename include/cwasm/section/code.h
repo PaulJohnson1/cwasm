@@ -32,13 +32,13 @@ struct cwasm_section_code
     cwasm_vector_declare(uint8_t, locals);
 };
 
-extern int cwasm_instruction_write(struct cwasm_instruction *,
+extern void cwasm_instruction_write(struct cwasm_instruction *,
+                                    struct proto_bug *);
+extern void cwasm_instruction_read(struct cwasm_instruction *,
                                    struct proto_bug *);
-extern int cwasm_instruction_read(struct cwasm_instruction *,
-                                  struct proto_bug *);
 extern void cwasm_instruction_free(struct cwasm_instruction *);
 
-extern int
+extern void
 cwasm_instruction_expression_read(struct cwasm_instruction_expression *,
                                   struct proto_bug *);
 extern void
@@ -56,7 +56,7 @@ cwasm_section_code_get_locals_end(struct cwasm_section_code *);
 CWASM_EXPORT extern uint8_t *
 cwasm_section_code_set_locals_end(struct cwasm_section_code *self, uint8_t *x);
 extern void cwasm_section_code_free(struct cwasm_section_code *);
-extern int cwasm_section_code_write(struct cwasm_section_code *,
+extern void cwasm_section_code_write(struct cwasm_section_code *,
+                                     struct proto_bug *);
+extern void cwasm_section_code_read(struct cwasm_section_code *,
                                     struct proto_bug *);
-extern int cwasm_section_code_read(struct cwasm_section_code *,
-                                   struct proto_bug *);

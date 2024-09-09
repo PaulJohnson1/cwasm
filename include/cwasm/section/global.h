@@ -14,7 +14,7 @@ struct cwasm_section_global
 };
 
 extern void cwasm_section_global_free(struct cwasm_section_global *);
-extern int cwasm_section_global_write(struct cwasm_section_global *,
+extern void cwasm_section_global_write(struct cwasm_section_global *,
+                                       struct proto_bug *);
+extern void cwasm_section_global_read(struct cwasm_section_global *,
                                       struct proto_bug *);
-extern int cwasm_section_global_read(struct cwasm_section_global *,
-                                     struct proto_bug *);
