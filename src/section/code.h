@@ -32,9 +32,9 @@ struct cwasm_section_code
 };
 
 extern void cwasm_instruction_write(struct cwasm_instruction *,
-                                   struct proto_bug *);
+                                    struct proto_bug *);
 extern void cwasm_instruction_read(struct cwasm_instruction *,
-                                  struct proto_bug *);
+                                   struct proto_bug *);
 extern void cwasm_instruction_free(struct cwasm_instruction *);
 
 extern void
@@ -48,6 +48,6 @@ cwasm_instruction_expression_free(struct cwasm_instruction_expression *);
 
 extern void cwasm_section_code_free(struct cwasm_section_code *);
 extern void cwasm_section_code_write(struct cwasm_section_code *,
-                                    struct proto_bug *);
+                                     struct proto_bug *);
 extern void cwasm_section_code_read(struct cwasm_section_code *,
-                                   struct proto_bug *);
+                                    struct proto_bug *);

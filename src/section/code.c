@@ -9,6 +9,7 @@
 #include <pb.h>
 
 #include <consts.h>
+#include <log.h>
 
 // #define X(op, immediate_count, ...)
 #define immediate_opcode_types                                                 \
@@ -217,22 +218,22 @@ enum e_wasm_types
 };
 
 void cwasm_instruction_write(struct cwasm_instruction *self,
-                            struct proto_bug *writer)
+                             struct proto_bug *pb)
 {
     if (self->op > 0xff)
     {
-        proto_bug_write_uint8(writer, self->op >> 8, "instruction::op");
-        proto_bug_write_varuint(writer, self->op & 255,
+        proto_bug_write_uint8(pb, self->op >> 8, "instruction::op");
+        proto_bug_write_varuint(pb, self->op & 255,
                                 "instruction::vu_larger_than_ff");
     }
     else
-        proto_bug_write_uint8(writer, self->op, "instruction::op");
+        proto_bug_write_uint8(pb, self->op, "instruction::op");
 
     switch (self->op)
     {
 #define Y(wasm_type, union_m_name)                                             \
     if (wasm_immediate_types[i] == wasm_types_##wasm_type)                     \
-        proto_bug_write_##wasm_type(writer, self->immediates[i].union_m_name,  \
+        proto_bug_write_##wasm_type(pb, self->immediates[i].union_m_name,      \
                                     "code::immediate");
 
 #define X(op, immediate_count, ...)                                            \
@@ -252,10 +253,10 @@ void cwasm_instruction_write(struct cwasm_instruction *self,
 #undef Y
         case cwasm_opcode_br_table:
     {
-        uint64_t immediates_count = self->immediates_end - self->immediates - 1;
-        proto_bug_write_varuint(writer, immediates_count, "immediate_br_table");
+        uint64_t immediates_count = self->immediates_end - self->immediates;
+        proto_bug_write_varuint(pb, immediates_count - 1, "immediate_br_table");
         for (uint64_t i = 0; i < immediates_count; i++)
-            proto_bug_write_varuint(writer, self->immediates[i + 1].uint64,
+            proto_bug_write_varuint(pb, self->immediates[i].uint64,
                                     "immediate");
         break;
     }
@@ -271,12 +272,12 @@ void cwasm_instruction_write(struct cwasm_instruction *self,
 }
 
 void cwasm_instruction_read(struct cwasm_instruction *self,
-                           struct proto_bug *reader)
+                            struct proto_bug *pb)
 {
-    uint32_t op = proto_bug_read_uint8(reader, "instruction::op");
+    uint32_t op = proto_bug_read_uint8(pb, "instruction::op");
     if (op == 0xfc || op == 0xfd)
         op = (op << 8) |
-             proto_bug_read_varuint(reader, "instruction::vu_larger_than_ff");
+             proto_bug_read_varuint(pb, "instruction::vu_larger_than_ff");
     self->op = op;
     self->immediates = 0;
     self->immediates_end = 0;
@@ -289,7 +290,7 @@ void cwasm_instruction_read(struct cwasm_instruction *self,
     {                                                                          \
         cwasm_vector_grow(union cwasm_immediate, self->immediates);            \
         (self->immediates_end++)->union_m_name =                               \
-            proto_bug_read_##wasm_type(reader, "code::immediate");             \
+            proto_bug_read_##wasm_type(pb, "code::immediate");                 \
     }
 
 #define X(op, immediate_count, ...)                                            \
@@ -309,23 +310,23 @@ void cwasm_instruction_read(struct cwasm_instruction *self,
         // instructions with variable number of immediates
         case cwasm_opcode_select_with_type:
     {
-        uint64_t max = proto_bug_read_varuint(reader, "element::init_size");
+        uint64_t max = proto_bug_read_varuint(pb, "element::init_size");
         for (uint64_t i = 0; i < max; i++)
         {
             cwasm_vector_grow(union cwasm_immediate, self->immediates);
             (self->immediates_end++)->uint64 =
-                proto_bug_read_varuint(reader, "code::immediate");
+                proto_bug_read_varuint(pb, "code::immediate");
         }
         break;
     }
     case cwasm_opcode_br_table:
     {
-        uint64_t max = proto_bug_read_varuint(reader, "immediate_br_table");
+        uint64_t max = proto_bug_read_varuint(pb, "immediate_br_table");
         for (uint64_t i = 0; i < max + 1; i++)
         {
             cwasm_vector_grow(union cwasm_immediate, self->immediates);
             (self->immediates_end++)->uint64 =
-                proto_bug_read_varuint(reader, "code::immediate");
+                proto_bug_read_varuint(pb, "code::immediate");
         }
 
         break;
@@ -333,7 +334,8 @@ void cwasm_instruction_read(struct cwasm_instruction *self,
 
     default:
         fprintf(stderr,
-                "invalid opcode found while reading: %02lx %" PRId64 "u\n",
+                "invalid opcode found while reading: %02" PRId64 "x %" PRId64
+                "u\n",
                 self->op, self->op);
         assert(0);
         break;
@@ -341,23 +343,33 @@ void cwasm_instruction_read(struct cwasm_instruction *self,
 }
 
 void cwasm_instruction_expression_write(struct cwasm_instruction_expression *e,
-                                        struct proto_bug *writer)
+                                        struct proto_bug *pb)
 {
     for (struct cwasm_instruction *i = e->instructions; i < e->instructions_end;
          i++)
-        cwasm_instruction_write(i, writer);
+    {
+        cwasm_log("write @%08lx  instr: op: %lu\n",
+                  proto_bug_get_total_size(pb), i->op);
+        cwasm_instruction_write(i, pb);
+    }
+
+    cwasm_log("write @%08lx  end instr expr: size: %" PRIuPTR "\n",
+              proto_bug_get_total_size(pb),
+              e->instructions_end - e->instructions);
 }
 
 void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
-                                      struct proto_bug *reader)
+                                       struct proto_bug *pb)
 {
     uint64_t depth = 1;
 
     while (1)
     {
         cwasm_vector_grow(struct cwasm_instruction, out->instructions);
-        cwasm_instruction_read(out->instructions_end, reader);
+        cwasm_instruction_read(out->instructions_end, pb);
         uint64_t op = out->instructions_end->op;
+        cwasm_log("read @%08lx   instr: op: %lu\n",
+                  proto_bug_get_total_size(pb), op);
         out->instructions_end++;
         switch (op)
         {
@@ -375,6 +387,10 @@ void cwasm_instruction_expression_read(struct cwasm_instruction_expression *out,
         if (depth == 0 && op == cwasm_opcode_end)
             break;
     }
+
+    cwasm_log("read @%08lx   end instr expr: size: %" PRIuPTR "\n",
+              proto_bug_get_total_size(pb),
+              out->instructions_end - out->instructions);
 }
 
 void cwasm_instruction_free(struct cwasm_instruction *i)
@@ -397,11 +413,14 @@ void cwasm_section_code_free(struct cwasm_section_code *self)
 }
 
 void cwasm_section_code_write(struct cwasm_section_code *self,
-                             struct proto_bug *writer)
+                              struct proto_bug *pb)
 {
+    cwasm_log("write @%08lx  begin function body\n",
+              proto_bug_get_total_size(pb));
     static uint8_t code_data[1024 * 1024 * 16];
-    struct proto_bug code_writer;
-    proto_bug_init(&code_writer, code_data);
+    struct proto_bug code_pb;
+    proto_bug_init(&code_pb, code_data);
+    code_pb.offset = proto_bug_get_total_size(pb);
 
     // find amount of local elements
     uint64_t local_amount = 0;
@@ -413,47 +432,72 @@ void cwasm_section_code_write(struct cwasm_section_code *self,
             local_type = *i;
         }
 
-    proto_bug_write_varuint(&code_writer, local_amount,
+    proto_bug_write_varuint(&code_pb, local_amount,
                             "code::local::element_size");
+    cwasm_log("write @%08lx  local decl count: %lu\n",
+              proto_bug_get_total_size(&code_pb), local_amount);
 
     local_amount = 0;
     local_type = 0;
-
     // write locals
     for (uint8_t *i = self->locals; i < self->locals_end; i++)
     {
-        if (*i == local_type)
-            local_amount++;
-        else
+        if (*i != local_type)
         {
+            if (local_amount != 0)
+            {
+                proto_bug_write_varuint(&code_pb, local_amount,
+                                        "code::local::amount");
+                proto_bug_write_uint8(&code_pb, local_type,
+                                      "code::local::type");
+
+                cwasm_log("write @%08lx   local decl: count: %lu, type: %u\n",
+                          proto_bug_get_total_size(&code_pb), local_amount,
+                          local_type);
+            }
             local_type = *i;
-            proto_bug_write_varuint(&code_writer, local_amount,
-                                    "code::local::amount");
-            proto_bug_write_uint8(&code_writer, local_type,
-                                  "code::local::type");
-            local_amount = 0;
+            local_amount = 1;
         }
+        else
+            local_amount++;
     }
 
-    uint64_t byte_count = proto_bug_get_size(&code_writer);
-    proto_bug_write_varuint(writer, byte_count, "code::instructions::size");
-    proto_bug_write_string_internal(writer, (char *)code_writer.start,
-                                    byte_count);
+    if (local_amount != 0)
+    {
+        proto_bug_write_varuint(&code_pb, local_amount, "code::local::amount");
+        proto_bug_write_uint8(&code_pb, local_type, "code::local::type");
+
+        cwasm_log("write @%08lx   local decl: count: %lu, type: %u\n",
+                  proto_bug_get_total_size(&code_pb), local_amount, local_type);
+    }
+
+    cwasm_instruction_expression_write(&self->expression, &code_pb);
+
+    uint64_t byte_count = proto_bug_get_size(&code_pb);
+    proto_bug_write_varuint(pb, byte_count, "code::instructions::size");
+    proto_bug_write_string_internal(pb, (char *)code_pb.start, byte_count);
 }
 
 void cwasm_section_code_read(struct cwasm_section_code *self,
-                            struct proto_bug *reader)
+                             struct proto_bug *pb)
 {
-    uint8_t *end = reader->current +
-                   proto_bug_read_varuint(reader, "code::instructions::size");
+    cwasm_log("read @%08lx   begin function body\n",
+              proto_bug_get_total_size(pb));
+    uint8_t *end =
+        pb->current + proto_bug_read_varuint(pb, "code::instructions::size");
     uint64_t local_element_count =
-        proto_bug_read_varuint(reader, "code::local::element_size");
+        proto_bug_read_varuint(pb, "code::local::element_size");
+
+    cwasm_log("read @%08lx    local decl count: %lu\n",
+              proto_bug_get_total_size(pb), local_element_count);
 
     for (uint64_t i = 0; i < local_element_count; i++)
     {
         uint64_t amount_of_type =
-            proto_bug_read_varuint(reader, "code::local::amount");
-        uint8_t type = proto_bug_read_uint8(reader, "code::local::type");
+            proto_bug_read_varuint(pb, "code::local::amount");
+        uint8_t type = proto_bug_read_uint8(pb, "code::local::type");
+        cwasm_log("read @%08lx   local decl: count: %lu, type: %u\n",
+                  proto_bug_get_total_size(pb), amount_of_type, type);
         for (uint64_t j = 0; j < amount_of_type; j++)
         {
             cwasm_vector_grow(uint8_t, self->locals);
@@ -462,5 +506,5 @@ void cwasm_section_code_read(struct cwasm_section_code *self,
         }
     }
 
-    cwasm_instruction_expression_read(&self->expression, reader);
+    cwasm_instruction_expression_read(&self->expression, pb);
 }

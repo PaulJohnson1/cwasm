@@ -1,5 +1,18 @@
 #pragma once
 
+// note: does not include custom, start or data_count
+#define cwasm_sections(X)                                                      \
+    X(type)                                                                    \
+    X(import)                                                                  \
+    X(function)                                                                \
+    X(table)                                                                   \
+    X(memory)                                                                  \
+    X(global)                                                                  \
+    X(export)                                                                  \
+    X(element)                                                                 \
+    X(code)                                                                    \
+    X(data)
+
 enum cwasm_const_section
 {
     cwasm_const_section_custom,

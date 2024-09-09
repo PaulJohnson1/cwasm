@@ -11,6 +11,6 @@ struct cwasm_section_function
 
 extern void cwasm_section_function_free(struct cwasm_section_function *);
 extern void cwasm_section_function_write(struct cwasm_section_function *,
-                                        struct proto_bug *);
+                                         struct proto_bug *);
 extern void cwasm_section_function_read(struct cwasm_section_function *,
-                                       struct proto_bug *);
+                                        struct proto_bug *);

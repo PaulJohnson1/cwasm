@@ -17,4 +17,10 @@ CMakeCache.txt
 .emsdk_version
 
 
+sample.cwasm.txt
+sample.cwasm.read.txt
+sample.cwasm.write.txt
+sample.wasm.txt
+*.wasm
+index.html
 out/*

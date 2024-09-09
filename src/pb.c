@@ -19,7 +19,7 @@ extern "C"
 #endif
 #define ENCODING_TYPES                                                         \
     XX(uint8)                                                                  \
-    XX(int8)                                                                  \
+    XX(int8)                                                                   \
     XX(uint16)                                                                 \
     XX(uint32)                                                                 \
     XX(uint64)                                                                 \
@@ -54,6 +54,7 @@ extern "C"
 
     void proto_bug_init(struct proto_bug *self, uint8_t *data)
     {
+        self->offset = 0;
         self->start = data;
         self->current = data;
     }
@@ -66,6 +67,11 @@ extern "C"
     uint64_t proto_bug_get_size(struct proto_bug *self)
     {
         return self->current - self->start;
+    }
+
+    uint64_t proto_bug_get_total_size(struct proto_bug *self)
+    {
+        return self->offset + proto_bug_get_size(self);
     }
 
     void proto_bug_write_uint8_internal(struct proto_bug *self, uint8_t data)
@@ -138,7 +144,7 @@ extern "C"
     {
         while (1)
         {
-            int32_t byte = data & 0x7fll;
+            int64_t byte = data & 0x7fll;
             data >>= 7ll;
 
             if ((data == -1ll && (byte & 0x40ll)) ||
@@ -230,17 +236,16 @@ extern "C"
         while (1)
         {
             int32_t byte = proto_bug_read_uint8_internal(self);
-            x |= (byte & 127) << shift;
+            x |= (byte & 0x7f) << shift;
             shift += 7;
 
-            if ((byte & 128) == 0)
-                break;
+            if ((byte & 0x80) == 0)
+            {
+                if (shift < 32 && (byte & 0x40) != 0)
+                    return x | (~0 << shift);
+                return x;
+            }
         }
-
-        if (shift >= 32)
-            return x;
-        int32_t ashift = 32 - shift;
-        return (x << ashift) >> ashift;
     }
     int64_t proto_bug_read_varint64_internal(struct proto_bug *self)
     {
@@ -249,12 +254,12 @@ extern "C"
         while (1)
         {
             int64_t byte = proto_bug_read_uint8_internal(self);
-            x |= (byte & 127ll) << shift;
+            x |= (byte & 0x7fll) << shift;
             shift += 7ll;
 
-            if ((byte & 128ll) == 0ll)
+            if ((byte & 0x80ll) == 0ll)
             {
-                if (shift < 32ll && (byte & 40ll) != 0ll)
+                if (shift < 64ll && (byte & 0x40ll) != 0ll)
                     return x | (~0ll << shift);
                 return x;
             }
@@ -267,7 +272,6 @@ extern "C"
             string[i] = proto_bug_read_uint8_internal(self);
     }
 
-#ifndef PROTO_BUG_NDEBUG
     static char assertion_fail_message[1024];
 
     void proto_bug_assert_valid_debug_header(
@@ -474,7 +478,6 @@ extern "C"
         proto_bug_assert_valid_debug_header(self, string, name, file, line);
         proto_bug_read_string_internal(self, string_pointer, size);
     }
-#endif
 
 #ifdef __cplusplus
 }
